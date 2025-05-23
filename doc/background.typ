@@ -112,3 +112,6 @@ Once the storage class is created, the PersistentVolumeClaims that the applicati
 ```
 
 With these changes in place, the application provisions Hyperdisks instead of Persistent Disks.
+
+== Conclusion
+#lorem(100) // TODO
