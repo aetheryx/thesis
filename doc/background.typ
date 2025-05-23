@@ -1,7 +1,13 @@
+#import "@preview/codly:1.3.0": *
+#import "setup.typ": setup
+#show: setup
+
 = Background Research
+== Introduction
+In order to answer the main question, a considerable amount of background research is required. This section of the report aims to provide answers to these questions. Namely, the various disk types offered by the cloud provider are introduced and explained, and the steps necessary to provision different disk types for the application are described.
 
 == Disk types
-Within the context of the application, disks can be categorised in various ways. One of these classifications is the attachment method, which describes how disks are attached to virtual machines: disks can either be *locally attached* or *network-attached*. This research is primarily a comparison between two network-attached storage types, namely Persistent Disks and Hyperdisks. However, local disks are also used by the application, and provide important context regarding the overall relevance of disk performance for the application. Therefore, this section provides an overview of the difference between locally attached and network-attached disks, and then further describes the differences between types of network-attached disks.
+The disks offered by the cloud provider can be categorized in various ways. One of these classifications is the attachment method, which describes how disks are attached to virtual machines: disks can either be *locally attached* or *network-attached*. This research is primarily a comparison between two network-attached storage types, namely Persistent Disks and Hyperdisks. However, local disks are also used by the application, and provide important context regarding the overall relevance of disk performance for the application. Therefore, this section provides an overview of the difference between locally attached and network-attached disks, and then further describes the differences between types of network-attached disks.
 
 === Local and network-attached disks
 The fundamental difference between local disks and network-attached disks is the way they interface with the virtual machine. Local disks have a direct hardware connection to the machine. Within the OSI model, this is considered the lowest layer: the physical layer. On the other hand, network-attached disks rely on a network connection to the machine, which is the third layer within the OSI model. Additionally, network-attached disks are typically located farther away physically. These different attachment methods result in a number of different characteristics between the disks, which are highlighted as follows.
@@ -13,7 +19,7 @@ The second characteristic is data persistence. Local disks are ephemeral, meanin
 === Network-attached disk types
 As previously mentioned, this research is primarily a comparison between two network-attached disk types, namely Persistent Disks and Hyperdisks. The application currently uses Persistent Disks. This section describes the differences between the two disk types.
 
-Historically, Persistent Disks were the primary type of network-attached storage offered by GCP. Hyperdisks were introduced in September 2022. While Persistent Disks have not been deprecated, several new CPU types offered by GCP exclusively support Hyperdisks. Therefore, one could argue that GCP has a long-term strategy to promote Hyperdisks as the primary network-attached disk offering.
+Historically, Persistent Disks were the primary type of network-attached storage offered by the cloud provider. Hyperdisks were introduced in September 2022. While Persistent Disks have not been deprecated, several new CPU types offered by the cloud provider exclusively support Hyperdisks. Therefore, one could argue that the cloud provider has a long-term strategy to promote Hyperdisks as the primary network-attached disk offering.
 
 Persistent Disks and Hyperdisks have various differences, two of which are most relevant to our research. The first difference lies in how performance is provisioned. The second difference is the pooling capability exclusive to Hyperdisks. These differences are further elaborated in the next sections.
 
@@ -42,24 +48,67 @@ The StorageClass resource defines a specific class of storage that the applicati
 The PersistentVolumeClaim resource represents a specific provisioned disk. This resource defines which StorageClass is to be used, as well as the disk capacity for the disk and related properties.
 
 === Current Persistent Disk configuration
-Currently, the application has a static StorageClass resource that specifies the Persistent Disk type. As new instances of the application are provisioned, a PersistentVolumeClaim resource is created, and this PersistentVolumeClaim specifies that the Persistent Disk storage class should be used.
+Currently, the application has a static StorageClass resource that specifies the Persistent Disk type. This StorageClass can be defined as follows:
+#codly(header: align(center)[*persistent-disk.StorageClass.yaml*])
 ```yaml
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: gke-ssd
-provisioner: pd.csi.storage.gke.io
+  name: persistent-disk
 parameters:
   type: pd-ssd
-  replication-type: none
-reclaimPolicy: Delete
-allowVolumeExpansion: true
-volumeBindingMode: Immediate
+```
+
+As new instances of the application are provisioned, a PersistentVolumeClaim resource is created, and this PersistentVolumeClaim specifies that the Persistent Disk storage class should be used as follows:
+#codly(header: align(center)[*my-pvc.PersistentVolumeClaim.yaml*])
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-pvc
+spec:
+  storageClassName: persistent-disk
+  resources:
+    requests:
+      storage: 256 GiB # Creates a 256 GiB disk
 ```
 
 === Provisioning Hyperdisks
 In order to implement Hyperdisks, a new storage class is created. This storage class specifies that the underlying disk type is a Hyperdisk. Additionally, the storage class defines a number of properties specific to Hyperdisks. The performance resources are defined, meaning the number of IOPS and the throughput in MiBps. 
+#codly(header: align(center)[*hyperdisk.StorageClass.yaml*])
+```yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: hyperdisk
+parameters:
+  type: hyperdisk-balanced
+  provisioned-iops-on-create: "3000"
+  provisioned-throughput-on-create: "140Mi"
+```
 
-While Hyperdisk Storage Pools are optional, they need to be provisioned as well. As Hyperdisk Storage Pools are highly specific to GCP, they cannot be provisioned through Kubernetes. Hyperdisk Storage Pools are created using the `gcloud` command line tool. If Hyperdisk Storage Pools are used, the storage class for Hyperdisks must additionally specify the name of the storage pool that disks using the storage class should be attached to.
+If Hyperdisk Storage Pools are used, the storage class for Hyperdisks must additionally specify the name of the storage pool that disks using the storage class should be attached to.
+#codly(header: align(center)[*hyperdisk.StorageClass.yaml*])
+```diff
+ parameters:
+   type: hyperdisk-balanced
++  storage-pool: "projects/hva/zones/europe-west/storagePools/my-pool"
+```
 
-Once the storage class is created, the PersistentVolumeClaims that the application creates need to specify the new storage class. With these changes in place, the application provisions Hyperdisks instead of Persistent Disks.
+Additionally, in this case, the storage pool itself must be provisioned. As Hyperdisk Storage Pools are highly specific to GCP, they cannot be provisioned through Kubernetes. Hyperdisk Storage Pools can be created using the `gcloud` command line tool as follows:
+```bash
+gcloud compute storage-pools create "my-pool" \
+    --project=hva --zone=europe-west4 \
+    --storage-pool-type=hyperdisk-balanced \
+    --provisioned-capacity=10240 # Capacity in GiB
+```
+
+Once the storage class is created, the PersistentVolumeClaims that the application creates can specify the new storage class as follows:
+#codly(header: align(center)[*my-pvc.PersistentVolumeClaim.yaml*])
+```diff
+ spec:
+-   storageClassName: persistent-disk
++   storageClassName: hyperdisk
+```
+
+With these changes in place, the application provisions Hyperdisks instead of Persistent Disks.
