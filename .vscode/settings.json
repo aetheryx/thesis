@@ -1,0 +1,10 @@
+{
+    "github.copilot.enable": {
+        "*": false,
+    },
+    "editor.formatOnSave": false,
+    "editor.trimAutoWhitespace": false,
+    "files.trimTrailingWhitespace": false,
+    "files.trimFinalNewlines": false,
+    "files.insertFinalNewline": false
+}
