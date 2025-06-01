@@ -39,7 +39,7 @@
 
 // core content
 #include "background.typ"
-#include "core.typ"
+#include "primary.typ"
 
 // conclusion
 #include "conclusion.typ"

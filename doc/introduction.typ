@@ -1,6 +1,8 @@
 #import "setup.typ": setup
 #show: setup
 
+#import "background.typ": background_questions
+
 // Een inleiding is een vooruitblik op de inhoud en structuur van het verslag. Je beschrijft kort de
 // aanleiding tot dit project. Schrijf niet in de ik/jij/wij stijl, zet je project centraal. De woorden ik/jij/wij etc.
 // zijn überhaupt verboden in je rapport (met uitzondering van voorwoord en reflectie). Schrijf ook niet over
@@ -14,29 +16,32 @@
 // afstudeerrapport.
 
 = Introduction
-Since the 2000s, a number of large tech companies have adopted the concept of _monorepos_. A monorepo is defined as a software development strategy in which distinct projects are stored in the same repository. Monorepos offer a number of key advantages, such as improved dependency management and code re-use. Within a monorepo, projects can form direct dependencies on each other and re-use the same core libraries.
+Since the 2000s, a number of large tech companies have adopted the concept of _monorepos_. A monorepo is defined as a software development strategy in which distinct projects are stored in the same repository. Monorepos offer a number of key advantages, such as improved dependency management and code re-use. Within a monorepo, projects can form direct source code dependencies on each other and re-use the same core libraries.
 
 However, monorepos often come with significant scaling challenges, as they can scale up to thousands of projects and billions of lines of code. Even with highly optimized monorepos, it becomes apparent that high-performance hardware is necessary. Top-of-the-line laptops are still restricted by certain characteristics: laptops need to remain transportable, have considerable thermal constraints, and need to optimize power usage. Compiling large apps or running large test suites on these laptops proves to be difficult. In order to solve this problem, Uber has developed a cloud-based development environment, where a key advantage is that the cloud offers hardware that is significantly more powerful than what is found in laptops. 
 
-Fundamentally, there are many similarities between cloud development environments and the laptops engineers would otherwise use. Cloud development environments run an operating system (Linux), are provisioned with a number of CPU cores, an amount of dedicated RAM, and a storage disk. This storage disk contains all of the files the user needs for development: the repositories they have cloned, any configuration files or local databases they use, and such. 
+There are many architectural similarities between cloud development environments and the laptops engineers would otherwise use. Cloud development environments run an operating system (Linux), are provisioned with a number of CPU cores, an amount of dedicated RAM, and a storage disk. This storage disk contains all of the files the user needs for development: the repositories they have cloned, any configuration files or local databases they use, and such. This brings us to the topic of this research: the storage disk for Uber's cloud development environment.
 
-This brings us to the topic of this research: the storage disk. The type of storage disk used for the environments is known as a Persistent Disk, a form of network-attached block storage offered by the cloud provider. Recently, the cloud provider has introduced a new type of disk known as a Hyperdisk. The topic of this research is investigating the differences between Persistent Disks and Hyperdisks in the context of Uber's cloud development environments.
+The type of storage disk used for the environments is known as a Persistent Disk, a form of network-attached block storage offered by the cloud provider. Recently, the cloud provider has introduced a new type of disk known as a Hyperdisk. The topic of this research is investigating the differences between Persistent Disks and Hyperdisks in the context of Uber's cloud development environments.
 
 == Problem Statement
 Now that the application and it's relevance to disk performance has been introduced, the problem statement of this research is defined as follows.
 
-Uber's cloud development environment is a cloud-based application used by engineers to develop codebases in monorepos. These cloud development environments are currently provisioned with a storage device known as a Persistent Disk. The cloud provider has recently announced a new type of disk known as a Hyperdisk. Uber would like to investigate a migration from Persistent Disks to Hyperdisks: they need a complete picture of the differences between the disk types, including what their fundamental differences are, and how the practical performance of cloud development environments is impacted by disk performance.
+Uber's cloud development environment is a cloud-based application used by engineers to develop codebases in monorepos. These cloud development environments are currently provisioned with a storage device known as a Persistent Disk. The cloud provider has recently announced a new type of disk known as a Hyperdisk. Uber would like to investigate a migration from Persistent Disks to Hyperdisks: they need a thorough understanding of the differences between the disk types, including what their fundamental differences are, how the practical performance of cloud development environments is impacted by disk performance, and the effectiveness of Hyperdisk-specific features (such as storage pooling and snapshot speed).
 
-Now that the core problem has been identified, we formulate the main research question as follows: \
+// tbd
+Now that the core problem has been identified, the main research question is formulated as follows: \
 #box(inset: (left: 18pt))[
-  _"What is the impact of Google Cloud Hyperdisks for Cloud Development Environments, as measured by build performance, disk utilization, compared to traditional persistent disks?"_ // tbd
+  _"What is the impact of Google Cloud Hyperdisks for Cloud Development Environments, as measured by build performance, disk utilization, compared to traditional persistent disks?"_
 ]
 
-In order to provide an answer to the main question, we will answer the following sub-questions: 
+Before an answer to the main question can be provided, a number of background research topics must be investigated. These background questions are as follows:
+#background_questions
+
+With the background research in place, we formulate the following sub-questions in order to provide an answer to the main question:
 #box(inset: (left: 18pt))[
-  + _"How can Hyperdisks be configured to match the raw performance of traditional disks in synthetic benchmarks, as measured by IOPS and data throughput?"_
-  + _"How can Hyperdisks be configured to match the real-world performance of traditional disks, as measured by build performance, IDE indexing and git latency?"_
-  + _"How is disk utilization affected by pooled Hyperdisks compared to persistent disks?"_
+  + _"How can Hyperdisks be configured to match the performance of traditional disks in primary workloads, as measured by build performance, IDE operations and git latency?"_
+  + _"How do Hyperdisk Storage Pools affect disk capacity utilization compared to persistent disks?"_
 ]
 
 == Research Methods
