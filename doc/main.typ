@@ -39,6 +39,7 @@
 
 // core content
 #include "background.typ"
+#include "perf_prov.typ"
 #include "primary.typ"
 
 // conclusion

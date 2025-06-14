@@ -37,7 +37,7 @@ Historically, Persistent Disks were the primary type of network-attached storage
 
 Persistent Disks and Hyperdisks have various differences, two of which are most relevant to our research. The first difference lies in how performance is provisioned. The second difference is the pooling capability exclusive to Hyperdisks. These differences are further elaborated in the following sections.
 
-=== Performance provisioning model
+=== Performance provisioning model <perf_model>
 For Persistent Disks, disk performance is calculated per virtual machine, meaning that all Persistent Disks attached to a given virtual machine share the same pool of performance resources. The performance resources themselves are calculated by the sum of disk capacity attached to the machine. IOPS scales with 30 IOPS per GiB of capacity, plus an additional 6000 IOPS per machine. Throughput scales with 0.48 MiBps per GiB of capacity, plus an additional 240 MiBps per machine. As an example, consider a machine with 8 Persistent Disks that each have 256 GiB of capacity. In this scenario, the disks attached to the machine share a pool of 67.440 IOPS and 1.223 MiBps of throughput. Under equal contention, these resources are divided by the number of disks, effectively 8.430 IOPS and 152 MiBps of throughput per disk.
 
 The performance provisioning model for Hyperdisks is fundamentally different. For them, performance is statically configured on a per-disk basis, and performance resources are not shared with other volumes attached to the same virtual machine. Each Hyperdisk has a baseline performance of 3.000 IOPS and 140 MiBps of throughput, where additional provisioned performance incurs cost. It is important to note that this additional cost for performance is factored into the cost of capacity: the cost of capacity for Hyperdisks is considerably lower than the cost of capacity for Persistent Disks. In the example model described in the previous paragraph, where each disk receives 8.430 IOPS and 152 MiBps of throughput under contention, the cost of Hyperdisks is nearly equal to the cost of Persistent Disks.
@@ -85,7 +85,7 @@ spec:
       storage: 256 GiB # Creates a 256 GiB disk
 ```
 
-=== Provisioning Hyperdisks
+=== Provisioning Hyperdisks <provisioning_hd>
 In order to implement Hyperdisks, a new storage class is created. This storage class specifies that the underlying disk type is a Hyperdisk. Additionally, the storage class defines a number of properties specific to Hyperdisks. The performance resources are defined, meaning the number of IOPS and the throughput in MiBps. This new storage class can be defined as follows:
 #codly(header: align(center)[*hyperdisk.StorageClass.yaml*])
 ```yaml

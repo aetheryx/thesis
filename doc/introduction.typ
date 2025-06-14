@@ -40,8 +40,9 @@ Before an answer to the main question can be provided, a number of background re
 
 With the background research in place, we formulate the following sub-questions in order to provide an answer to the main question:
 #box(inset: (left: 18pt))[
-  + _"How can Hyperdisks be configured to match the performance of traditional disks in primary workloads, as measured by build performance, IDE operations and git latency?"_
-  + _"How do Hyperdisk Storage Pools affect disk capacity utilization compared to persistent disks?"_
+  + _"How do the differences in the performance provisioning models between Persistent Disks and Hyperdisks impact the theoretical disk performance of Uber's CDE?"_
+  + _"How does migrating from Persistent Disks to Hyperdisks affect the performance of Uber's CDE, as measured by build latency for large projects?"_
+  + _"How do Hyperdisk Storage Pools affect disk capacity utilization compared to Persistent Disks?"_
 ]
 
 == Research Methods
