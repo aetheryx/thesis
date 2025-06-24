@@ -15,5 +15,7 @@
     zebra-fill: none
   )
 
+  set raw(syntaxes: "syntaxes/promql.sublime-syntax")
+
   doc
 }

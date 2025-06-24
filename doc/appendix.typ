@@ -76,3 +76,34 @@ time_based = 1
 runtime = 1000d
 ```
 
+== Prometheus queries 
+=== Measuring individual noisy neighbors <prom_disks>
+This query selects individual disks that have a resource usage above 40.000 IOPS.
+#codly(header: align(center)[*noisy-neighbors.promql*])
+```promql
+sum by (device_name) (
+  max_over_time(
+    instance_disk_max_write_ops_count{
+      zone="europe-west4-c",
+      device_name=~"pvc-.*",
+    }[$__interval]
+  )
+) > 40000
+```
+
+=== Measuring occurrences of any noisy neighbors <prom_flat>
+This query returns a flattened metric that returns a `vector(1)` when noisy neighbors were observed, and no data when no noisy neighbors were observed.
+#codly(header: align(center)[*noisy-neighbors.promql*])
+```promql
+count(
+  sum by (device_name) (
+    max_over_time(
+      instance_disk_max_write_ops_count{
+        zone="europe-west4-c",
+        device_name=~"pvc-.*"
+      }[$__interval]
+    )
+  ) > 40000
+) * vector(0) + vector(1)
+```
+
