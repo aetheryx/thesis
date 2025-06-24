@@ -26,7 +26,7 @@
 #import "setup.typ": setup
 #show: setup
 
-#image("HvA-HBO-ICT-zwart-RGB.png")
+#image("images/hva-logo.png")
 
 #align(center, text(22pt)[
   Investigating Google Cloud Hyperdisks for Uber's Cloud Development Environment

@@ -10,7 +10,7 @@ The primary advantage of pooled performance is _burstability_. Consider a distri
 In order to demonstrate this impact, we will perform an experiment measuring the raw disk performance of CDE's with a synthetic benchmark. In this experiment, the performed task is writing 4 GiB of randomized data to the disk. We will provision two groups of CDE's: one group using Persistent Disks (pooled performance), and one group using Hyperdisks (static performance). For each group, we will measure how long the task takes to execute, with a varying amount of CDE's either performing the task or being idle. These executions are started at the same time within each group: for example, when measuring the execution time for 3 CDE's, all 3 CDE's start the task at the same time.
 
 The results of this experiment are visualised as follows:
-#image("perf_burst.png")
+#image("images/perf_burst.png")
 
 From the graph above, we can make a number of observations. Firstly, for CDE's using pooled performance (labeled "PD" for Persistent Disk), we observe a correlation between the amount of idle neighbors and the reduction in execution time: the more neighbors are idle, the lower the execution time is. Secondly, for CDE's using static performance (labeled "HD" for Hyperdisk), we observe that the execution time is not impacted by the idle-active distribution: no matter the amount of idle neighbors, CDE's using Hyperdisks perform the task in a consistent time. Thirdly, we observe that when all CDE's are active, the execution time of both pooled performance and static performance is nearly equal.
 
@@ -23,7 +23,7 @@ Performance pooling results in a lack of predictability regarding the availabili
 In order to investigate the fairness of the resource redistribution algorithm, we will perform an experiment measuring raw disk performance using a synthetic benchmark. In this experiment, we will set up two groups of 4 CDE's each, where the first group is using Hyperdisks and the second group is using Persistent Disks. The task that we will measure is writing 1 GiB of data to the disk. In order to measure fairness, these tasks will be performed with a varying amount of _noisy neighbors_, where a noisy neighbor is a resource consumer within the same pool that is already occupying performance resources prior to the start of the task execution. For this specific experiment, we will simulate noisy neighbors by instructing them to continuously write randomized data to the disk as fast as possible, effectively attempting to use as many performance resources as available.
 
 The results of this experiment are visualised as follows:
-#image("perf_neighbor.png")
+#image("images/perf_neighbor.png")
 
 // remove x noisy, x active, x idle labels, very confusing
 
@@ -37,7 +37,7 @@ To demonstrate this difference across the two performance provisioning models, w
 The experiment collected a total of 750 samples. The results are visualised as follows:
 // todo: x axis for hyperdisk is longer
 
-#image("distrib.png")
+#image("images/distrib.png")
 #align(center)[#table(
   columns: 6,
   [], [Minimum], [Median], [Maximum], [Min-Max Range], [Std. Dev.],
