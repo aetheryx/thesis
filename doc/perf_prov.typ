@@ -59,7 +59,7 @@ The first advantage of pooled performance is the ability to share resources for 
 
 #align(center)[#image("images/cpu-example.png")]
 
-While this is just one example, it clearly demonstrates the bursty utilization pattern. We observe that the majority of time is spent idling as the engineer works on smaller tasks, and we observe a number of larger bursts. 
+While this is just one example, it clearly demonstrates the bursty utilization pattern. We observe that the majority of time is spent idling as the engineer works on smaller tasks, and we observe a number of larger bursts when the engineer needs to compile projects to run them.
 
 In addition to the bursty utilization pattern, consider that Uber's CDE's are provisioned on a virtual machine holding 12 to 14 CDE deployments. Taking all factors into account, we understand the utilization pattern of CDE's is bursty and resources are shared between 12 deployments. Therefore, it is likely that individual CDE's would significantly benefit from pooled performance, as it is unlikely that a majority of the 12 deployments would be executing performance intensive tasks.
 
@@ -71,19 +71,28 @@ The first advantage of static performance is predictability, especially being mo
 Using a Prometheus query, we can measure the allocated IOPS for each Persistent Disk in the region, and select metrics where the allocated IOPS are above a certain threshold. Considering that Uber's CDE's share 100.000 IOPS per resource pool, we define a noisy neighbor as an individual disk using 40% of this capacity, i.e. 40.000 IOPS. The full query is available in the Appendix (@prom_disks). Over the past 14 days, this query returns the following graph data:
 #image("images/noisy-disks.png")
 
-Visually, we can observe that noisy neighbors are not a frequent occurrence. For a simpler understanding of the occurrences and their durations, we can refactor the query to return a flat metric, returning a `vector(1)` when noisy neighbors were observed and no data when no noisy neighbors were observed. The full refactored query is available in the Appendix (@prom_flat). Over the past 14 days, we observe the following graph:
-#image("images/noisy-flat.png")
+Visually, we can observe that noisy neighbors are not a frequent occurrence. The raw data for this query can be further analyzed to measure the amount of occurrences and their durations. The results of the analysis are as follows:
 
-The raw data of the flattened query can be further analyzed to count the amount of occurrences and their durations. 
+#table(
+  columns: 2,
+  [Metric], [Value],
 
+  [Amount of occurrences], [40],
+  [Minimum duration], [5 minutes],
+  [Mean duration], [7.5 minutes],
+  [Maximum duration], [20 minutes],
+)
 
+It is worth noting that the time intervals were downsampled by the query engine, as this data is being queried over a large timeframe (14 days). Regardless, the observations indicate that noisy neighbors are not a frequent occurrence. The Europe region for Uber's CDE contains approximately 50 virtual machines, each with a dedicated resource pool. Over the course of 14 days, we observed 40 occurrences of noisy neighbors across all 50 of these virtual machines, and the mean duration for noisy neighbor activity was only 7.5 minutes. 
 
+To conclude, while the improved predictability and isolation of static performance does provide resiliency against noisy neighbors, this type of activity occurs very infrequently for very short time intervals. Therefore, this benefit of static performance is not expected to be useful for Uber's CDE.
 
+=== Improved consistency and precision
+The second advantage of static performance is improved accuracy and precision regarding the performance allocations. This is an advantage that is primarily relevant for latency-critical workloads, such as production databases or real-time stock trading systems. The experiment performed earlier in this chapter indicated that the accuracy of the performance allocations under static performance is an order of magnitude more accurate than pooled performance.
 
+However, objectively, the accuracy of pooled performance is perfectly acceptable for Uber's CDE's. CDE's are effectively development environments, and the difference in accuracy could not be perceived by a human engineer. The accuracy of pooled performance resource allocations still performed consistent enough for CDE's as a usecase.
 
+To conclude, while static performance does provision performance more accurately, this advantage is irrelevant to Uber's CDE's.
 
-
-// keep it simple
-// graph 1: pd vs hd with idle neighbors, show pd >> hd
-// graph 2: pd vs hd under contention, show hd is consistent and pd is not
-
+== Conclusion
+#lorem(100)
