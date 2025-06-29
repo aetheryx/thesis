@@ -1,7 +1,7 @@
 #import "setup.typ": setup
 #show: setup
 
-= Impact of performance provisioning models
+= Impact of performance provisioning models <perf_prov>
 This chapter answers the _"How do the differences in the performance provisioning models of Persistent Disks and Hyperdisks impact the raw disk performance of Uber's CDE?"_ sub-question. As previously mentioned in @perf_model, the fundamental difference between the performance provisioning models is that Persistent Disks share a pool of performance resources (known as "pooled performance") and Hyperdisks provision performance statically per disk (known as "static performance"). In this chapter, we will further investigate the advantages and disadvantages between the two performance provisioning models, in order to determine how they affect raw disk performance. It is important to note that the performance provisioning models are merely one aspect of the disks: in further chapters, other characteristics will be investigated.
 
 == Background research: Measuring raw disk performance
@@ -50,6 +50,8 @@ The experiment collected a total of 750 samples. The results are visualised as f
 )]
 
 From these results, we observe that pooled performance significantly impacts the consistency of resource availability. For both performance provisioning models, the median execution time is nearly equal around 108.1 seconds. For Persistent Disks, we observe a min-max range of 5.22 seconds and a standard deviation of 1.09 seconds. Hyperdisks proved to perform much more consistently, with a min-max range of only 0.07 seconds and a standard deviation of 0.02 seconds.
+
+Aside from the difference in accuracy, the nearly equal median execution times are a further indication of the fundamental similarities between Hyperdisks and Persistent Disks. Accuracy aside, the fact that the median execution time is nearly equal in these scenarios indicates that the underlying hardware between the disk types performs similarly in isolation.
 
 == Interpreting results for Uber's CDE
 Up until now, the previous sections of this chapter have presented experiment results with general observations. In this section, we will relate the experiment results to Uber's CDE, in order to understand what the real-world impact for the raw disk performance of Uber's CDE's may be.
@@ -100,3 +102,5 @@ To investigate the advantages and disadvantages between the performance provisio
 Firstly, the pooled performance model of Persistent Disks allows for significant disk performance improvements, as Uber's CDE exhibits a bursty workload pattern. This is a significant advantage for Persistent Disks that would be lost when migrating to Hyperdisks. Secondly, the static performance model of Hyperdisks provides stronger resiliency against noisy neighbors, however, noisy neighbors were proven to be a rare occurrence for Uber's CDE. Therefore, while this resiliency is an advantage for Hyperdisks, it is not very useful for Uber's CDE. Thirdly, the static performance model provides significantly improved accuracy for performance allocations compared to Persistent Disks. However, as Uber's CDE is not a latency-critical application, the accuracy of Persistent Disks is sufficient. Therefore, the improved accuracy of Hyperdisks does not provide a useful benefit for Uber's CDE's.
 
 To conclude, the pooled performance model of Persistent Disks is more advantageous for Uber's CDE. The primary reason for this is that Uber's CDE's exhibit a bursty workload pattern, meaning that resource pooling allows for significantly larger performance allocations for active CDE's, as their neighbors are likely idle. The static performance model of Hyperdisks does not allow for resource sharing, which is a significant disadvantage. While the static performance model does bring other benefits, such as resiliency against noisy neighbors and improved accuracy of performance allocations, these other benefits are minimally useful for Uber's CDE's. 
+
+Additionally, the experiments indicated that the underlying hardware between Hyperdisks and Persistent Disks performs nearly equally in apples-to-apples comparisons. In the first experiment comparing burstability, Persistent Disks and Hyperdisks performed nearly equally under contention, with execution times of 107.02 seconds and 106.96 seconds respectively. Further, in the third experiment comparing accuracy for latency-critical workloads, the median execution times are nearly equal at 108.14 seconds and 108.10 seconds respectively.
