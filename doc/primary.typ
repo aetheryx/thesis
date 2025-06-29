@@ -1,6 +1,4 @@
-// can compare 5 pd concurrent vs. 5 hd concurrent
-
-
+#import "@preview/codly:1.3.0": *
 #import "setup.typ": setup
 #show: setup
 
@@ -51,6 +49,67 @@ Additionally, the process to measure a single build execution is defined as foll
 + Each build is performed in isolation, meaning all other CDE's in the pool are idle, and there are no other tasks running on the active CDE.
 + For each build, the remote dependencies in the target graph are pre-fetched. This ensures that our results do not rely on network performance, as the reliability of external package registries would influence our results incorrectly.
 + For each build, the measurement is taken using the `time` command-line tool found on most standard Linux systems.
+
+== Results
+The results of the experiment are visualised as follows:
+
+#align(center)[#image("images/build_perf.png", width: 120%)]
+
+From these results, there are a number of initial observations to make. Firstly, we observe that for the Golang, Web, Python and Android monorepos, build time is negligibly affected by Hyperdisks. Considering that the PD configuration has more than 10 times the IOPS as the minimum Hyperdisk configuration, this is an unexpected result. Secondly, we observe that the Java monorepo is affected by the reduction in IOPS, unlike the other monorepos. The remainder of this section elaborates on the root cause for these observations. 
+
+=== Unaffected monorepos
+First, let us investigate why the Golang, Web, Python and Android monorepos are minimally affected by the reduction in disk performance. As observed in the results above, the Golang and Web monorepos are nearly identical: for Golang, the Persistent Disk and PD-equivalent Hyperdisk configuration performed identically, and the minimum Hyperdisk configuration was 0.3% slower. In the Python and Android monorepos, the differences are slightly larger, with the Python monorepo observing degradations of 0.2% and 2.4% respectively, and the Android monorepo observing degradations of 1.2% and 1.5% respectively.
+
+It is important to remember that this research focuses on the comparison between Persistent Disks and Hyperdisks, both of which are forms of network-attached storage. However, as mentioned in @both_disks, Uber's CDE's provision another type of disk as well: the locally-attached disk. As a reminder, locally-attached disks offer significantly more performance than network-attached disks, but locally-attached disks are ephemeral while network-attached disks are persisted. 
+
+Recall from @both_disks that the locally-attached disk is used for the build output, and the network-attached disk is used to store the source code repository. Each of these disks serve specific purposes during a build. As the network-attached storage holds the contents of the repository, the source code files in the repository are read so that they can be compiled. And as the locally-attached storage holds the build outputs, compiled targets are written to the locally-attached storage, as well as being read from the locally-attached storage when they are consumed as a dependency.
+
+This experiment compares different configurations of network-attached disks. In all three disk configurations, the same locally-attached disks were used to store the build output. In order to understand the relevance of both disks, we are able to use the `strace` Linux profiling tool to intercept the low-level system calls made by the build tooling. We can then perform further analysis on the recorded system calls in order to quantify the relevance of each of the disks.
+
+The following table describes an aggregated comparison of the disk-related system calls made, categorized by the disk type:
+#table(
+  columns: 4,
+  [], [Network-attached], [Locally-attached], [Relative increase],
+  [Files opened], [4.857], [91.339], [18,8x],
+  [Sum of bytes read], [73,52 MiB], [8,21 GiB], [106,6x],
+  [Sum of bytes written], [14,07 KiB], [2,67 GiB], [189.653,1x]
+)
+
+Comparing the locally-attached disk to the network-attached disk, we observe that there were over 100 times more bytes read, and nearly 190.000 times more bytes written. It is clear that during a build, the build output directory receives an order of magnitude more disk operations compared to the repository directory. This explains why the Golang, Web, Python and Android monorepos are minimally affected by the reduction in disk performance for the network-attached disk: this disk is simply not used nearly as much as the locally-attached disk that stores the build output, therefore minimally impacting the overall build performance.
+
+=== The Java monorepo
+The results of the experiment indicated that the Golang, Web, Python and Android were minimally impacted by the reduction in disk performance, but the Java monorepo did observe a considerable impact.
+
+The previous section provided an answer for the minimally impact monorepos: those monorepos were minimally impacted because they were configured to use locally-attached disks for build outputs, making the network-attached disk less relevant. When investigating the directory configuration for the Java monorepo, we observe that it's configuration deviates. The configuration for all minimally impacted monorepos is as follows:
+#codly(header: align(center)[*bazel-base*])
+```bash
+$ bazel info output_base
+/home/user/.cache/bazel/_bazel_user/b97476
+$ findmnt -T $(bazel info output_base)
+TARGET                  SOURCE
+/home/user/.cache/bazel /dev/md0
+```
+
+And the configuration for the Java monorepo is as follows:
+```bash
+$ bazel info output_base
+/home/user/.java_bazelcache/workspace/156927
+$ findmnt -T $(bazel info output_base)
+TARGET     SOURCE
+/home/user /dev/nvme0n5
+```
+
+We observe that the other monorepos are configured to use the `~/.cache/bazel` directory for build outputs, and this directory is mounted on the `/dev/md0` block device, which is the locally-attached disk. However, the Java monorepo has overridden the build output directory to `~/.java_bazelcache`, and this directory is not mounted on the locally-attached disk. As it falls under the home directory, it is effectively using the network-attached disk `/dev/nvme0n5`. 
+
+This deviation in the configuration for the Java monorepo explains why it is impacted by the reduction in disk performance: for the Java monorepo, the network-attached disk is utilized fully for the build output, meaning that the performance of the network-attached disk is much more relevant.
+
+In order to confirm this theory, we can configure the Java CDE's to mount the `~/.java_bazelcache` directory on the locally-attached disk. With this change in place, the build times for the Java monorepo are measured again and visualised as follows:
+#image("images/build-java.png")
+
+With the improved configuration in place, we observe that the Java monorepo behaves the same way as the other monorepos: the reduction in disk performance does not affect build performance.
+
+Whether the deviating configuration is intentional is uncertain. In the results above, we observe that the build performance for Persistent Disks had a minimal improvement in execution time, from 79 seconds to 77.7 seconds. Additionally, using the network-attached disk for build outputs has the added benefit of being able to persist the build cache across restarts of the CDE. Considering this benefit, and the fact that using network-attached storage for the build output did not result in a large performance improvement for the Java monorepo, it would seem feasible that the configuration was intentional. If Hyperdisks were to be adopted, the advantage of using the locally-attached disk for the build output would be more significant, as the locally-attached disk reduced the build duration from 102.9 seconds to 77.9 seconds using the minimum Hyperdisk configuration.
+
 
 
 

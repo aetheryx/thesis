@@ -22,8 +22,8 @@ The fundamental difference between local disks and network-attached disks is the
 The first characteristic is performance. The performance of locally attached disks is an order of magnitude higher than network-attached disks, primarily due to the fact that they are attached at different layers within the OSI model. Specifically, local disks can scale up to 3.2 million IOPS and 12,480 MiBps of throughput, whereas network-attached disks can only scale up to 120,000 IOPS and 2,200 MiBps of throughput.
 
 The second characteristic is data persistence. Local disks are ephemeral, meaning the data stored on them is discarded if the virtual machine they’re attached to is restarted. This makes local disks more suited for temporary storage use-cases, such as caching. On the other hand, network-attached disks are able to persist their data, making them more suited for long-running use-cases, such as databases. 
-
-=== How the application uses both disks
+ 
+=== How the application uses both disks <both_disks>
 As previously mentioned, the primary difference between the disk types is that locally attached disks are more performant but ephemeral, and network-attached disks are less performant but persisted. In order for the application to leverage advantages from both disks, each instance of the application is provisioned with a network-attached disk as well as a locally-attached disk, and each disk serves different purposes.
 
 The network-attached disk is used as the primary form of storage for the user's files. Considering that local disks are ephemeral, they are not suited to store user files, as they would not be persisted across restarts. Specifically, the network-attached disk is used for the _home directory_ of a development environment. This includes various things, such as the source code for all repositories the user has cloned, or any local databases or configuration files the user needs. Each development environment is provisioned with 256 GiB of capacity.

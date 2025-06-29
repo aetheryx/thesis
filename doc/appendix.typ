@@ -106,4 +106,3 @@ count(
   ) > 40000
 ) * vector(0) + vector(1)
 ```
-
