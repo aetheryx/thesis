@@ -29,7 +29,7 @@ It is not feasible to measure the build time of all projects in each monorepo. T
 
 The selected subset must represent the projects in the monorepo with sufficient breadth. The selection criteria is defined as follows. First, the projects in each monorepo are sorted by an appropriate heuristic that represents their expected build duration. Then, the projects at each of the three quartiles are selected for measurement, meaning the projects at the 25th, 50th and 75th percentile sorted by the heuristic. 
 
-Specifically, the chosen heuristic is the amount of transitive dependencies each project has. The reason this heuristic is appropriate is due to the nature of monorepos. Fundamentally, the relationship between targets in monorepos is a directed acyclic graph, where each node in the graph represents any necessary files for other targets to depend on. Considering the final executable target of a project as a leaf node, this node will have direct dependencies on nodes containing the source files implementing the project. Other dependencies, such as libraries, are represented in the build graph as well. Therefore, the total amount of transitive dependencies of a project accurately represents it's size: it includes the implementation files of the project itself, as well as the dependencies of the project, and their dependencies, and so on.
+Specifically, the chosen heuristic is the amount of transitive dependencies each project has. The reason this heuristic is appropriate is due to the nature of monorepos. Fundamentally, the relationship between targets in monorepos is a directed acyclic graph, where each node in the graph represents any necessary files for other targets to depend on #cite(<bazel-deps-dag>). Considering the final executable target of a project as a leaf node, this node will have direct dependencies on nodes containing the source files implementing the project. Other dependencies, such as libraries, are represented in the build graph as well. Therefore, the total amount of transitive dependencies of a project accurately represents it's size: it includes the implementation files of the project itself, as well as the dependencies of the project, and their dependencies, and so on.
 
 In summary, we will select three projects in each monorepo, which are the projects at the 25th, 50th and 75th percentiles sorted by transitive dependency count per project.
 
@@ -37,6 +37,8 @@ In summary, we will select three projects in each monorepo, which are the projec
 As previously mentioned, the goal of the experiment is to compare the build duration between Hyperdisks and Persistent Disks, for each of the five monorepos supported by Uber. For each monorepo, we will select three projects for measurement.
 
 It is important that we understand how the disk types affect build performance for each monorepo specifically: for example, the Golang monorepo might be affected by disk performance differently than the Web monorepo, as they are completely different languages that are compiled and executed differently. Further, it is not important that the differences within the three selected projects are analyzed, as the goal of the subset selection is to represent the monorepo as a whole. Considering these requirements, the experiment will yield one measurement for each combination of a monorepo and a disk configuration, where each measurement represents the average build time of that monorepo under that disk configuration.
+
+\
 
 Specifically, the measurement strategy is defined as follows:
 + In order to reduce the risk of abnormal measurements, each project is measured 10 times. Out of the 10 measurements, the median measurement is selected as the build time for this specific project.
@@ -64,7 +66,7 @@ It is important to remember that this research focuses on the comparison between
 
 Recall from @both_disks that the locally-attached disk is used for the build output, and the network-attached disk is used to store the source code repository. Each of these disks serve specific purposes during a build. As the network-attached storage holds the contents of the repository, the source code files in the repository are read so that they can be compiled. And as the locally-attached storage holds the build outputs, compiled targets are written to the locally-attached storage, as well as being read from the locally-attached storage when they are consumed as a dependency.
 
-This experiment compares different configurations of network-attached disks. In all three disk configurations, the same locally-attached disks were used to store the build output. In order to understand the relevance of both disks, we are able to use the `strace` Linux profiling tool to intercept the low-level system calls made by the build tooling. We can then perform further analysis on the recorded system calls in order to quantify the relevance of each of the disks.
+This experiment compares different configurations of network-attached disks. In all three disk configurations, the same locally-attached disks were used to store the build output. In order to understand the relevance of both disks, we are able to use the `strace` Linux profiling tool to intercept the low-level system calls made by Bazel. We can then perform further analysis on the recorded system calls in order to quantify the relevance of each of the disks.
 
 The following table describes an aggregated comparison of the disk-related system calls made, categorized by the disk type:
 #table(
@@ -81,10 +83,9 @@ Comparing the locally-attached disk to the network-attached disk, we observe tha
 The results of the experiment indicated that the Golang, Web, Python and Android were minimally impacted by the reduction in disk performance, but the Java monorepo did observe a considerable impact.
 
 The previous section provided an answer for the minimally impact monorepos: those monorepos were minimally impacted because they were configured to use locally-attached disks for build outputs, making the network-attached disk less relevant. When investigating the directory configuration for the Java monorepo, we observe that it's configuration deviates. The configuration for all minimally impacted monorepos is as follows:
-#codly(header: align(center)[*bazel-base*])
 ```bash
 $ bazel info output_base
-/home/user/.cache/bazel/_bazel_user/b97476
+"/home/user/.cache/bazel/_bazel_user/b97476"
 $ findmnt -T $(bazel info output_base)
 TARGET                  SOURCE
 /home/user/.cache/bazel /dev/md0
@@ -93,7 +94,7 @@ TARGET                  SOURCE
 And the configuration for the Java monorepo is as follows:
 ```bash
 $ bazel info output_base
-/home/user/.java_bazelcache/workspace/156927
+"/home/user/.java_bazelcache/workspace/156927"
 $ findmnt -T $(bazel info output_base)
 TARGET     SOURCE
 /home/user /dev/nvme0n5
@@ -101,10 +102,10 @@ TARGET     SOURCE
 
 We observe that the other monorepos are configured to use the `~/.cache/bazel` directory for build outputs, and this directory is mounted on the `/dev/md0` block device, which is the locally-attached disk. However, the Java monorepo has overridden the build output directory to `~/.java_bazelcache`, and this directory is not mounted on the locally-attached disk. As it falls under the home directory, it is effectively using the network-attached disk `/dev/nvme0n5`. 
 
-This deviation in the configuration for the Java monorepo explains why it is impacted by the reduction in disk performance: for the Java monorepo, the network-attached disk is utilized fully for the build output, meaning that the performance of the network-attached disk is much more relevant.
+This deviation in the configuration for the Java monorepo explains why it is impacted by the reduction in disk performance: for the Java monorepo, the network-attached disk is utilized fully for the build output, meaning that the performance of the network-attached disk is much more relevant. In order to confirm this theory, we can configure the Java CDE's to mount the `~/.java_bazelcache` directory on the locally-attached disk. 
 
-In order to confirm this theory, we can configure the Java CDE's to mount the `~/.java_bazelcache` directory on the locally-attached disk. With this change in place, the build times for the Java monorepo are measured again and visualised as follows:
-#image("images/build-java.png")
+With this change in place, the build times for the Java monorepo are measured again and visualised as follows:
+#align(center)[#image("images/build-java.png", width: 120%)]
 
 With the improved configuration in place, we observe that the Java monorepo behaves the same way as the other monorepos: the reduction in disk performance does not affect build performance.
 
@@ -118,4 +119,5 @@ For the Go, Web, Python, and Android monorepos, the experiment indicated that Hy
 For the Java monorepo, the experiment indicated that Hyperdisks resulted in a considerable degradation in build time. The reason why the Java monorepo behaves differently is because it does not use locally-attached disks for the build output directories. When modifying the configuration for the Java monorepo to align with the other monorepos, it behaves the same way as the Go and Web monorepos, meaning no impact is observed between the disk configurations. It is unclear whether the deviating configuration for the Java monorepo is intentional. Effectively, the Java monorepo currently observes a 13.5% increase in build duration for the PD-equivalent Hyperdisk configuration, and a 30.3% increase for the minimum Hyperdisk configuration. However, these degradations can be mitigated if the configuration is modified.
 
 To conclude, build performance is minimally affected by migrating from Persistent Disks to Hyperdisks for the majority of Uber's monorepos, due to the fact that their build output directories are not stored on network-attached disks. The Java monorepo is an exception, where a 30.3% increase in build duration was observed for the minimum Hyperdisk configuration. However, the Java monorepo can be reconfigured to behave the same way as the other monorepos, in which case it would not observe a degradation in build time.
+
 

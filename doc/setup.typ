@@ -15,7 +15,7 @@
   show: codly-init.with()
   codly(
     languages: codly-languages,
-    zebra-fill: none
+    zebra-fill: luma(245)
   )
 
   set raw(syntaxes: "syntaxes/promql.sublime-syntax")

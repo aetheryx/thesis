@@ -19,8 +19,29 @@
 // - bijlage(n) (nummer de bijlagen apart).
 // De onderdelen die tussen haakjes staan zijn facultatief.
 
+#let glossary_entries = (
+  cde: (
+    short: "CDE",
+    long: "cloud development environment",
+    description: "An on-demand, pre-configured development environment that runs in the cloud."
+  ),
+  bazel: (
+    short: "Bazel",
+    description: "A build system built by Google to create scalable monorepos."
+  ),
+  monorepo: (
+    short: "monorepo",
+    description: "A source code repository that holds multiple distinct projects that can form source code dependencies on each other, as well as core libraries."
+  )
+)
+
 #import "setup.typ": setup
 #show: setup
+
+#import "@preview/glossy:0.8.0": *
+
+#show: init-glossary.with(glossary_entries)
+
 
 // title
 #include "cover.typ"
@@ -31,7 +52,12 @@
 #pagebreak()
 
 // toc
-#outline(title: "Table of Contents")
+#outline(title: "Table of Contents", depth: 3)
+#pagebreak()
+
+// glossary
+#set heading(numbering: none)
+#glossary(groups: (""), show-all: true)
 #pagebreak()
 
 // introduction
@@ -44,7 +70,9 @@
 
 // core content
 #include "perf_prov.typ"
-#include "primary.typ"
+#pagebreak()
+#include "builds.typ"
+#pagebreak()
 #include "disk_cap.typ"
 #pagebreak()
 
