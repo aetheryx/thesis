@@ -79,5 +79,5 @@
 
 #align(center + bottom)[
   Version 0.1 \
-  23 May 2025
+  30 June 2025
 ]
