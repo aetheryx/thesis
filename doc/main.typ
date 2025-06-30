@@ -52,13 +52,15 @@
 #pagebreak()
 
 // toc
-#outline(title: "Table of Contents", depth: 3)
+#place(outline(title: "Table of Contents", depth: 3))
 #pagebreak()
 
 // glossary
-#set heading(numbering: none)
-#glossary(groups: (""), show-all: true)
-#pagebreak()
+#[
+  #set heading(numbering: none, bookmarked: false, outlined: false)
+  #glossary(groups: (""), show-all: true)
+  #pagebreak()  
+]
 
 // introduction
 #include "introduction.typ"

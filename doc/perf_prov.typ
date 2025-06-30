@@ -47,11 +47,11 @@ The experiment collected a total of 750 samples. The results are visualised as f
   columns: 6,
   [], [Min.], [Median], [Max.], [Range], [Std. Dev.],
 
-  [Persistent Disk], [105.52], [108.14], [110.74], [5.22], [1.09],
-  [Hyperdisk], [108.05], [108.10], [108.12], [0.07], [0.02]
+  [Persistent Disk], [105,52], [108,14], [110,74], [5,22], [1,09],
+  [Hyperdisk], [108,05], [108,10], [108,12], [0,07], [0,02]
 )]
 
-From these results, we observe that pooled performance significantly impacts the consistency of resource availability. For both performance provisioning models, the median execution time is nearly equal around 108.1 seconds. For Persistent Disks, we observe a min-max range of 5.22 seconds and a standard deviation of 1.09 seconds. Hyperdisks proved to perform much more consistently, with a min-max range of only 0.07 seconds and a standard deviation of 0.02 seconds.
+From these results, we observe that pooled performance significantly impacts the consistency of resource availability. For both performance provisioning models, the median execution time is nearly equal around 108,1 seconds. For Persistent Disks, we observe a min-max range of 5,22 seconds and a standard deviation of 1,09 seconds. Hyperdisks proved to perform much more consistently, with a min-max range of only 0,07 seconds and a standard deviation of 0,02 seconds.
 
 Aside from the difference in consistency, the nearly equal median execution times are a further indication of the fundamental similarities between Hyperdisks and Persistent Disks. The fact that the median execution time is nearly equal in these scenarios indicates that the underlying hardware between the disk types performs identically in isolation.
 
@@ -86,11 +86,11 @@ Visually, we can observe that noisy neighbors are not a frequent occurrence. The
 
   [Amount of occurrences], [40],
   [Minimum duration], [5 minutes],
-  [Mean duration], [7.5 minutes],
+  [Mean duration], [7,5 minutes],
   [Maximum duration], [20 minutes],
 )
 
-It is worth noting that the time intervals were downsampled by the query engine, as this data is being queried over a large timeframe (14 days). Regardless, the observations indicate that noisy neighbors are not a frequent occurrence. The Europe region for Uber's CDE contains approximately 50 virtual machines, each with a dedicated resource pool. Over the course of 14 days, we observed 40 occurrences of noisy neighbors across all 50 of these virtual machines, and the mean duration for noisy neighbor activity was only 7.5 minutes.
+It is worth noting that the time intervals were downsampled by the query engine, as this data is being queried over a large timeframe (14 days). Regardless, the observations indicate that noisy neighbors are not a frequent occurrence. The Europe region for Uber's CDE contains approximately 50 virtual machines, each with a dedicated resource pool. Over the course of 14 days, we observed 40 occurrences of noisy neighbors across all 50 of these virtual machines, and the mean duration for noisy neighbor activity was only 7,5 minutes.
 
 To conclude, while the improved predictability and isolation of static performance does provide resiliency against noisy neighbors, this type of activity occurs infrequently for short time intervals. Therefore, this benefit of static performance is not expected to be useful for Uber's CDE.
 
@@ -108,4 +108,4 @@ Firstly, the pooled performance model of Persistent Disks allows for significant
 
 To conclude, the pooled performance model of Persistent Disks is more advantageous for Uber's CDE. Resource pooling allows for significantly larger performance allocations for active @cde:short:pl, as their neighbors are likely idle. While static performance brings other benefits, such as resiliency against noisy neighbors and improved consistency of performance allocations, these other benefits are minimally useful for Uber's @cde:short:pl.
 
-Additionally, the experiments indicated that the underlying hardware between Hyperdisks and Persistent Disks performs nearly equally in fair comparisons. In the first experiment comparing burstability, Persistent Disks and Hyperdisks performed nearly equally under contention, with execution times of 107.02 seconds and 106.96 seconds respectively. Further, in the third experiment comparing consistency for latency-critical workloads, the median execution times are nearly equal at 108.14 seconds and 108.10 seconds respectively.
+Additionally, the experiments indicated that the underlying hardware between Hyperdisks and Persistent Disks performs nearly equally in fair comparisons. In the first experiment comparing burstability, Persistent Disks and Hyperdisks performed nearly equally under contention, with execution times of 107,02 seconds and 106,96 seconds respectively. Further, in the third experiment comparing consistency for latency-critical workloads, the median execution times are nearly equal at 108,14 seconds and 108,10 seconds respectively.

@@ -1,3 +1,6 @@
+#import "setup.typ": setup
+#show: setup
+
 // De conclusies
 // In het hoofdstuk 'conclusies' formuleer je een kort antwoord op je probleemvraag.
 // (onderzoeksvraag/probleemstelling). Uitgebreide motiveringen zijn hier uit den boze, want die staan al
