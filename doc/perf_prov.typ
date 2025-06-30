@@ -26,8 +26,8 @@ From these results, we can make a number of observations. Firstly, for @cde:shor
 == Advantages of static performance provisioning
 As described in the previous section, performance pooling can allow for improved performance for burstable workloads. While this seems like a significant advantage, performance pooling also introduces a lack of predictability and consistency when it comes to the availability of performance resources.
 
-=== Improved resiliency against starvation
-Performance pooling is susceptible to resource starvation under contention. More specifically, this is known as the "noisy neighbor" problem within computing #cite(<bouattour-2020>). Suppose that there are 4 @cde:short:pl using pooled performance, and 1 CDE within this pool is executing a long-running performance intensive task, effectively claiming all resources in the pool. In this situation, if a second CDE wants to perform a task, the resource scheduler needs to fairly re-distribute the performance resources within the pool, effectively needing to deallocate resources from the first CDE and allocate them to the second CDE. When using performance pooling, this reallocation process does not always happen fairly, leading to resource starvation.
+=== Isolation against noisy neighbors
+The first advantage of static performance is the fact that performance allocations are isolated from neighboring CDE's on the same virtual node. When using pooled performance, CDE's can be susceptible to resource starvation under contention from neighboring CDE's. More specifically, this is known as the "noisy neighbor" problem within computing #cite(<bouattour-2020>). Suppose that there are 4 @cde:short:pl using pooled performance, and 1 CDE within this pool is executing a long-running performance intensive task, effectively claiming all resources in the pool. In this situation, if a second CDE wants to perform a task, the resource scheduler needs to fairly re-distribute the performance resources within the pool, effectively needing to deallocate resources from the first CDE and allocate them to the second CDE. When using performance pooling, this reallocation process does not always happen fairly, leading to resource starvation.
 
 In order to investigate the fairness of the resource redistribution algorithm, we will perform an experiment with the goal of understanding how execution time is impacted when the performance scheduler needs to redistribute allocated resources. The task we will measure is the execution time to write 1 GiB of randomized data to the disk. For each measurement, one CDE will execute the task for measurement, and a varying amount of @cde:short:pl will act as noisy neighbors. As previously mentioned, a noisy neighbor is a resource consumer within the same pool that is already occupying performance resources prior to the start of the task execution. We will simulate noisy neighbors by instructing them to continuously write randomized data to the disk as fast as possible, effectively attempting to use as many performance resources as available.
 
@@ -70,16 +70,17 @@ In addition to the bursty utilization pattern, consider that Uber's @cde:short:p
 
 To conclude, burstability would allow for significantly improved disk performance for Uber's @cde:short:pl, therefore making pooled performance more optimal in this aspect.
 
-=== Noisy neighbors
-The first advantage of static performance is predictability, especially being more resilient to noisy neighbors. In order to determine how useful resiliency against noisy neighbors is for Uber's @cde:short:pl, we can query the past 14 days of resource usage for Uber's @cde:short:pl and observe occurrences of noisy neighbors. We will specifically query the Europe region, where there are currently 620 active @cde:short:pl.
+=== Isolation
+The first advantage of static performance is isolation, specifically being more resilient to noisy neighbors. In order to determine how useful resiliency against noisy neighbors is for Uber's @cde:short:pl, we can query the past 14 days of resource usage for Uber's @cde:short:pl and observe occurrences of noisy neighbors. We will specifically query the Europe region, where there are currently 620 active @cde:short:pl.
 
 Using a Prometheus query, we can measure the allocated IOPS for each Persistent Disk in the region, and select metrics where the allocated IOPS are above a certain threshold. Considering that Uber's @cde:short:pl share 100.000 IOPS per resource pool, we define a noisy neighbor as an individual disk using 40% of this capacity, i.e. 40.000 IOPS. The full query is available in the Appendix (@prom_disks).
 
 Over the past 14 days, this query returns the following graph data:
 #align(center)[#rect(image("images/noisy-disks.png"), width: 120%, stroke: gray)]
 
-Visually, we can observe that noisy neighbors are not a frequent occurrence. The raw data for this query can be further analyzed to measure the amount of occurrences and their durations. The results of the analysis are as follows:
+Visually, we can observe that noisy neighbors are not a frequent occurrence. The raw data for this query can be further analyzed to measure the amount of occurrences and their durations. The script for this analysis is available in the GitHub repository at #link("https://github.com/aetheryx/thesis/tree/main/noise")[`thesis/noise`].
 
+The results of the analysis are as follows:
 #table(
   columns: 2,
   [Metric], [Value],
@@ -90,14 +91,14 @@ Visually, we can observe that noisy neighbors are not a frequent occurrence. The
   [Maximum duration], [20 minutes],
 )
 
-It is worth noting that the time intervals were downsampled by the query engine, as this data is being queried over a large timeframe (14 days). Regardless, the observations indicate that noisy neighbors are not a frequent occurrence. The Europe region for Uber's CDE contains approximately 50 virtual machines, each with a dedicated resource pool. Over the course of 14 days, we observed 40 occurrences of noisy neighbors across all 50 of these virtual machines, and the mean duration for noisy neighbor activity was only 7,5 minutes.
+It is worth noting that the time intervals were downsampled by the query engine, as this data is being queried over a large timeframe (14 days). Regardless, the analysis indicates that noisy neighbors are not a frequent occurrence. The Europe region for Uber's CDE contains approximately 50 virtual machines, each with a dedicated resource pool. Over the course of 14 days, we observed 40 occurrences of noisy neighbors across all 50 of these virtual machines, and the mean duration for noisy neighbor activity was only 7,5 minutes.
 
-To conclude, while the improved predictability and isolation of static performance does provide resiliency against noisy neighbors, this type of activity occurs infrequently for short time intervals. Therefore, this benefit of static performance is not expected to be useful for Uber's CDE.
+To conclude, while the isolation of static performance does provide resiliency against noisy neighbors, this type of activity occurs infrequently, for short time intervals. Therefore, this benefit of static performance is not expected to be useful for Uber's CDE.
 
 === Improved consistency
-The second advantage of static performance is improved consistency regarding the performance allocations. The experiment performed earlier in this chapter indicated that the accuracy of the performance allocations under static performance is an order of magnitude more accurate than pooled performance.
+The second advantage of static performance is improved consistency regarding the performance allocations. The experiment performed earlier in this chapter indicated that the performance allocations under static performance are an order of magnitude more accurate than pooled performance.
 
-However, the accuracy of pooled performance is perfectly acceptable for Uber's @cde:short:pl. @cde:short:pl are effectively development environments, and the difference in consistency could not be perceived by a human engineer. The consistency of pooled performance resource allocations still performed consistent enough for @cde:short:pl as a usecase.
+However, the consistency under pooled performance is perfectly acceptable for Uber's @cde:short:pl. @cde:short:pl are effectively development environments, and the difference in consistency would realistically not be perceived by a human engineer. The consistency of pooled performance resource allocations is adequate for @cde:short:pl as a usecase.
 
 To conclude, while static performance does provision performance more consistently, this advantage is irrelevant to Uber's @cde:short:pl.
 

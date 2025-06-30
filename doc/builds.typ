@@ -66,15 +66,15 @@ It is important to remember that this research focuses on the comparison between
 
 Recall from @both_disks that the locally-attached disk is used for the build output, and the network-attached disk is used to store the source code repository. Each of these disks serve specific purposes during a build. As the network-attached storage holds the contents of the repository, the source code files in the repository are read so that they can be compiled. And as the locally-attached storage holds the build outputs, compiled targets are written to the locally-attached storage, as well as being read from the locally-attached storage when they are consumed as a dependency.
 
-This experiment compares different configurations of network-attached disks. In all three disk configurations, the same locally-attached disks were used to store the build output. In order to understand the relevance of both disks, we are able to use the `strace` Linux profiling tool to intercept the low-level system calls made by @bazel. We can then perform further analysis on the recorded system calls in order to quantify the relevance of each of the disks.
+In order to understand the relevance of the locally-attached disk and the network-attached disk, the `strace` Linux profiling tool can be used to intercept the low-level system calls made by @bazel. Further analysis can then be performed on the recorded system calls, in order to quantify the utilization of each disk. The scripts used to generate these traces and analyze them are available in the GitHub repository at #link("https://github.com/aetheryx/thesis/tree/main/strace")[`thesis/strace`]. 
 
 The following table describes an aggregated comparison of the disk-related system calls made, categorized by the disk type:
 #table(
   columns: 4,
   [], [Network-attached], [Locally-attached], [Relative increase],
-  [Files opened], [4.857], [91.339], [18,8x],
-  [Sum of bytes read], [73,52 MiB], [8,21 GiB], [106,6x],
-  [Sum of bytes written], [14,07 KiB], [2,67 GiB], [189.653,1x]
+  [Files opened], [4.857], [91.339], [19x],
+  [Sum of bytes read], [73,52 MiB], [8,21 GiB], [107x],
+  [Sum of bytes written], [14,07 KiB], [2,67 GiB], [189.653x]
 )
 
 Comparing the locally-attached disk to the network-attached disk, we observe that there were over 100 times more bytes read, and nearly 190.000 times more bytes written. It is clear that during a build, the build output directory receives an order of magnitude more disk operations compared to the repository directory. This explains why the Golang, Web, Python and Android monorepos are minimally affected by the reduction in disk performance for the network-attached disk: this disk is simply not used nearly as much as the locally-attached disk that stores the build output, therefore minimally impacting the overall build performance.
