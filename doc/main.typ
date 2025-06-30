@@ -38,13 +38,23 @@
 #include "introduction.typ"
 #pagebreak()
 
-// core content
+// background research
 #include "background.typ"
+#pagebreak()
+
+// core content
 #include "perf_prov.typ"
 #include "primary.typ"
+#include "disk_cap.typ"
+#pagebreak()
 
 // conclusion
 #include "conclusion.typ"
 #pagebreak()
 
+// bibliography
+#bibliography("bibliography.bib", style: "apa")
+#pagebreak()
+
+// appendix
 #include "appendix.typ"

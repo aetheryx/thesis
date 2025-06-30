@@ -2,6 +2,8 @@
 #import "setup.typ": setup
 #show: setup
 
+#set heading(outlined: false)
+
 = Appendix
 == FIO commands <appendix_fio>
 === Base configuration
@@ -18,7 +20,7 @@ ioengine = libaio
 
 # Whether `fio` should connect disk utilization metrics
 # Disabled as these are not relevant to our research
-disk_util = 0  ;
+disk_util = 0
 
 # Whether `fio` should collect various latency metrics
 # Disabled as these are not relevant to our research
@@ -92,10 +94,10 @@ sum by (device_name) (
 ```
 
 === Measuring occurrences of any noisy neighbors <prom_flat>
-This query returns a flattened metric that returns a `vector(1)` when noisy neighbors were observed, and no data when no noisy neighbors were observed.
+This query returns a flattened metric that returns a high signal when noisy neighbors were observed, and a low signal when no noisy neighbors were observed.
 #codly(header: align(center)[*noisy-neighbors.promql*])
 ```promql
-count(
+(count(
   sum by (device_name) (
     max_over_time(
       instance_disk_max_write_ops_count{
@@ -104,5 +106,6 @@ count(
       }[$__interval]
     )
   ) > 40000
-) * vector(0) + vector(1)
+) * vector(0)) + vector(1)
+or vector(0)
 ```

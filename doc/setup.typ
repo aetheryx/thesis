@@ -6,6 +6,9 @@
     size: 12pt
   )
 
+  show link: set text(rgb("#0857c9"))
+  show cite: set text(rgb("#0857c9"))
+
   // set up codly
   import "@preview/codly:1.3.0": *
   import "@preview/codly-languages:0.1.1": *

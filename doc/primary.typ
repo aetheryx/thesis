@@ -4,7 +4,7 @@
 
 = Build performance
 == Introduction
-This chapter answers the _"How is build performance affected by migrating from Persistent Disks to Hyperdisks?"_ sub-question. As previously mentioned, the investigated application is Uber's cloud development environment, which was initially developed to improve the build performance of large-scale codebases compared to laptops. Therefore, build performance is considered one of the most relevant metrics to describe the overall performance of Uber's CDE's. In order to compare the build performance between Persistent Disks and Hyperdisks, we will perform an experiment measuring how long it takes to build projects across various disk configurations.
+This chapter answers the _"How does migrating Uber's CDE from Persistent Disks to Hyperdisks affect the build duration of projects?"_ sub-question. As previously mentioned, the investigated application is Uber's cloud development environment, which was initially developed to improve the build performance of large-scale codebases compared to laptops. Therefore, build performance is considered one of the most relevant metrics to describe the overall performance of Uber's CDE's. In order to compare the build performance between Persistent Disks and Hyperdisks, we will perform an experiment measuring how long it takes to build projects across various disk configurations.
 
 == Defining the experiment
 As mentioned in the introduction of this paper, Uber has adopted the concept of monorepos, which are a development strategy where multiple projects are located within the same repository and form direct dependencies on each other. More specifically, Uber maintains a total of five monorepos supported by Uber's CDE, each of which holds projects in specific programming languages. The five supported monorepos are the Golang monorepo, the Java monorepo, the Web monorepo, the Python monorepo and the Android monorepo. When a CDE is created, it is preconfigured for one specific monorepo. Therefore, the goal of the experiment is to compare build performance between Persistent Disks and Hyperdisks, for all of the supported monorepos. 
@@ -118,13 +118,4 @@ For the Go, Web, Python, and Android monorepos, the experiment indicated that Hy
 For the Java monorepo, the experiment indicated that Hyperdisks resulted in a considerable degradation in build time. The reason why the Java monorepo behaves differently is because it does not use locally-attached disks for the build output directories. When modifying the configuration for the Java monorepo to align with the other monorepos, it behaves the same way as the Go and Web monorepos, meaning no impact is observed between the disk configurations. It is unclear whether the deviating configuration for the Java monorepo is intentional. Effectively, the Java monorepo currently observes a 13.5% increase in build duration for the PD-equivalent Hyperdisk configuration, and a 30.3% increase for the minimum Hyperdisk configuration. However, these degradations can be mitigated if the configuration is modified.
 
 To conclude, build performance is minimally affected by migrating from Persistent Disks to Hyperdisks for the majority of Uber's monorepos, due to the fact that their build output directories are not stored on network-attached disks. The Java monorepo is an exception, where a 30.3% increase in build duration was observed for the minimum Hyperdisk configuration. However, the Java monorepo can be reconfigured to behave the same way as the other monorepos, in which case it would not observe a degradation in build time.
-
-// The definition of _primary workloads_ is as follows: as previously mentioned, the  These environments allow engineers to perform many different tasks, as any software engineer does. By _primary workloads_, we specifically investigate the most commonly performed tasks by engineers, focusing on their core workflow. 
-
-// Specifically, the primary workloads selected for investigation are build performance, IDE operations and git latency. Each of these workloads are individually investigated in this chapter, yielding data that is statistically analyzed. At the end of the chapter, the analysis is used to draw conclusions, combined with the context of the goal.
-
-
-
-
-
 

@@ -13,7 +13,7 @@
 In order to answer the main question, a considerable amount of background research is required. This section aims to provide this background research by answering the following questions:
 #background_questions
 
-== Disk types provisioned by the application
+== Disk types provisioned by the application <disk_types_provisioned>
 The application currently provisions two types of disks for different purposes. The first is the Persistent Disk, which is compared against Hyperdisks in this research. Both Persistent Disks and Hyperdisks are forms of network-attached storage. In addition to the Persistent Disk, the application also provisions a form of locally-attached storage. This section explains the difference between network-attached and locally-attached storage, and how the application leverages the different disk types.
 
 === Local and network-attached disks
@@ -30,7 +30,7 @@ The network-attached disk is used as the primary form of storage for the user's 
 
 The locally-attached disk is used to store the build output and the build cache. As mentioned in the introduction, a key characteristic of monorepos is that dependencies are cached on the disk. By storing this disk cache on a locally-attached disk, the environments can leverage the performance of locally-attached disks. Additionally, the lack of data persistence for locally-attached disks is acceptable, as it merely holds cached build output. It is important to note that locally attached disks are provisioned to virtual machines, and not instances of the application. Each virtual machine is provisioned with 6 TiB of local storage, and a given virtual machine holds around 12 instances of cloud development environments. Effectively, a group of 12 cloud development environments shares the same 6 TiB local disk.
 
-== The differences between Persistent Disks and Hyperdisks
+== The differences between Persistent Disks and Hyperdisks <diff_between_pd_hd>
 As previously mentioned, this research is primarily a comparison between two network-attached disk types, namely Persistent Disks and Hyperdisks. The application currently uses Persistent Disks. This section describes the differences between the two disk types.
 
 Historically, Persistent Disks were the primary type of network-attached storage offered by the cloud provider. Hyperdisks were introduced more recently, in September 2022. While Persistent Disks have not been deprecated, several new CPU types offered by the cloud provider exclusively support Hyperdisks. Therefore, one could argue that the cloud provider has a long-term strategy to promote Hyperdisks as their primary network-attached disk offering.
@@ -49,18 +49,18 @@ As an example, consider a scenario of 8 cloud development environments. As menti
 
 In addition to the ability to share capacity, the cloud provider states that Hyperdisk Storage Pools use various data reduction technologies to increase storage efficiency, presumably data deduplication and compression. The cloud provider does not provide in-depth detail regarding how these data reduction algorithms are implemented, nor what the expected reduction ratio is. Therefore, these claims are further investigated in Chapter TODO.
 
-== Provisioning Hyperdisks for the application
+== Provisioning Hyperdisks for the application <section_prov_hd>
 The application currently provisions Persistent Disks for it's network-attached storage use-cases. This section provides a brief overview of the steps taken for the application to provision Hyperdisks instead of Persistent Disks.
 
 === How disks are provisioned
-The application is built on Kubernetes, an orchestration system for containerised applications. Kubernetes is effectively an abstraction on top of the cloud provider used by the application. Practically, this means that the application provisions Persistent Disks by creating Kubernetes resources, and Kubernetes further interfaces with the cloud provider's API to provision the disk. The two relevant Kubernetes resources are the StorageClass resource and the PersistentVolumeClaim resource.
+The application is built on Kubernetes, an orchestration system for containerised applications. Kubernetes is effectively an abstraction on top of the cloud provider used by the application. Practically, this means that the application provisions Persistent Disks by creating Kubernetes resources, and Kubernetes further interfaces with the cloud provider's API to provision the disk. The two relevant Kubernetes resources are the `StorageClass` resource and the `PersistentVolumeClaim` resource.
 
-The StorageClass resource defines a specific class of storage that the application is able to provision. Storage classes define the type of underlying disk to provision, for example Persistent Disks or Hyperdisks. Additionally, they define related properties, such as backup policies or encryption strategies.
+The `StorageClass` resource defines a specific class of storage that the application is able to provision. Storage classes define the type of underlying disk to provision, for example Persistent Disks or Hyperdisks. Additionally, they define related properties, such as backup policies or encryption strategies.
 
-The PersistentVolumeClaim resource represents a specific provisioned disk. This resource defines which StorageClass is to be used, as well as the disk capacity for the disk and related properties.
+The `PersistentVolumeClaim` resource represents a specific provisioned disk. This resource defines which `StorageClass` is to be used, as well as the disk capacity for the disk and related properties.
 
 === Current Persistent Disk configuration
-Currently, the application has a static StorageClass resource that specifies the Persistent Disk type. This storage class can be defined as follows:
+Currently, the application has a static `StorageClass` resource that specifies the Persistent Disk type. This storage class can be defined as follows:
 #codly(header: align(center)[*persistent-disk.StorageClass.yaml*])
 ```yaml
 apiVersion: storage.k8s.io/v1
@@ -71,7 +71,7 @@ parameters:
   type: pd-ssd # Specifies the Persistent Disk type for the cloud provider
 ```
 
-As new instances of the application are provisioned, a PersistentVolumeClaim resource is created, and this PersistentVolumeClaim specifies that the Persistent Disk storage class should be used as follows:
+As new instances of the application are provisioned, a `PersistentVolumeClaim` resource is created, and this `PersistentVolumeClaim` specifies that the Persistent Disk storage class should be used as follows:
 #codly(header: align(center)[*my-pvc.PersistentVolumeClaim.yaml*])
 ```yaml
 apiVersion: v1
@@ -128,5 +128,8 @@ With these changes in place, the application provisions Hyperdisks instead of Pe
 == Conclusion
 The application currently uses two kinds of storage types: locally attached storage, which is high performance but not suited for long-term storage, and network-attached storage, which is slower but suited for long-term storage. For network-attached storage, the application currently uses Persistent Disks, and performance for Persistent Disks is shared between other Persistent Disks attached to the same virtual machine. This is fundamentally different for Hyperdisks, where the performance is statically configured on a per-disk basis.
 
-In terms of implementation details, the application uses Kubernetes as an abstraction layer on top of cloud resources. Disk types are defined using Kubernetes StorageClass resources, and disks are provisioned using PersistentVolumeClaim resources. The application can migrate from Persistent Disks to Hyperdisks by creating a new StorageClass for Hyperdisks, and specifying this new storage class when provisioning PersistentVolumeClaims. 
+In terms of implementation details, the application uses Kubernetes as an abstraction layer on top of cloud resources. Disk types are defined using Kubernetes `StorageClass` resources, and disks are provisioned using `PersistentVolumeClaim` resources. The application can migrate from Persistent Disks to Hyperdisks by creating a new `StorageClass` for Hyperdisks, and specifying this new storage class when provisioning `PersistentVolumeClaim` resources. 
+
+
+
 
