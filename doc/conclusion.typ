@@ -15,5 +15,5 @@
 // N.B. Het is niet zo dat conclusies een samenvatting overbodig maken, want ze komen daarin slechts
 // beknopt terug.
 
-= Conclusion
+= Conclusion (TODO)
 #lorem(250)

@@ -5,6 +5,7 @@
     font: "libertinus serif",
     size: 12pt
   )
+  set page(numbering: "1")
 
   show link: set text(rgb("#0857c9"))
   show cite: set text(rgb("#0857c9"))

@@ -13,5 +13,8 @@
 // - de belangrijkste resultaten kort samengevat;
 // - de (belangrijkste) conclusies.
 
-#heading(level: 1, outlined: false, numbering: none)[Abstract]
-#lorem(250)
+#[
+  #set heading(outlined: false, numbering: none)
+  = Abstract (TODO)
+]
+#lorem(100)
