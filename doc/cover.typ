@@ -23,7 +23,7 @@
 // - bedrijfsbegeleider;
 // - stageperiode (semester, studiejaar).
 
-#import "setup.typ": setup
+#import "lib/setup.typ": setup
 #show: setup
 
 #image("images/hva-logo.png")

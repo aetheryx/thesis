@@ -1,4 +1,4 @@
-#import "setup.typ": setup
+#import "lib/setup.typ": setup
 #show: setup
 
 #import "background.typ": background_questions

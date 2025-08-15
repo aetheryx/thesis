@@ -1,4 +1,4 @@
-#import "setup.typ": setup
+#import "lib/setup.typ": setup
 #show: setup
 
 = Impact of performance provisioning models <perf_prov>

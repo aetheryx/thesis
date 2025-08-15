@@ -19,7 +19,7 @@
     zebra-fill: luma(245)
   )
 
-  set raw(syntaxes: "syntaxes/promql.sublime-syntax")
+  set raw(syntaxes: "./promql.sublime-syntax")
 
   doc
 }

@@ -1,5 +1,5 @@
 #import "@preview/codly:1.3.0": *
-#import "setup.typ": setup
+#import "lib/setup.typ": setup
 #show: setup
 
 #set heading(outlined: false)

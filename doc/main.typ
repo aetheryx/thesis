@@ -35,7 +35,7 @@
   )
 )
 
-#import "setup.typ": setup
+#import "lib/setup.typ": setup
 #show: setup
 
 #import "@preview/glossy:0.8.0": *

@@ -1,5 +1,5 @@
 #import "@preview/codly:1.3.0": *
-#import "setup.typ": setup
+#import "lib/setup.typ": setup
 #show: setup
 
 #let background_questions = box(inset: (left: 18pt))[
