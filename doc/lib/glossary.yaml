@@ -1,0 +1,16 @@
+cde:
+  short: "CDE"
+  long: "cloud development environment"
+  description: "An on-demand, pre-configured development environment that runs in the cloud."
+
+bazel:
+  short: "Bazel"
+  description: "A build system built by Google to create scalable monorepos."
+
+monorepo:
+  short: "monorepo"
+  description: "A source code repository that holds multiple distinct projects that can form source code dependencies on each other, as well as core libraries."
+
+kubernetes:
+  short: "Kubernetes"
+  description: "An orchestration system for containerised applications. https://kubernetes.io/"

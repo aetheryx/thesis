@@ -19,29 +19,12 @@
 // - bijlage(n) (nummer de bijlagen apart).
 // De onderdelen die tussen haakjes staan zijn facultatief.
 
-#let glossary_entries = (
-  cde: (
-    short: "CDE",
-    long: "cloud development environment",
-    description: "An on-demand, pre-configured development environment that runs in the cloud."
-  ),
-  bazel: (
-    short: "Bazel",
-    description: "A build system built by Google to create scalable monorepos."
-  ),
-  monorepo: (
-    short: "monorepo",
-    description: "A source code repository that holds multiple distinct projects that can form source code dependencies on each other, as well as core libraries."
-  )
-)
-
 #import "lib/setup.typ": setup
 #show: setup
 
 #import "@preview/glossy:0.8.0": *
-
-#show: init-glossary.with(glossary_entries)
-
+#import "lib/glossy-theme.typ": glossy-theme
+#show: init-glossary.with(yaml("lib/glossary.yaml"))
 
 // title
 #include "cover.typ"
@@ -58,7 +41,7 @@
 // glossary
 #[
   #set heading(numbering: none, bookmarked: false, outlined: false)
-  #glossary(groups: (""), show-all: true)
+  #glossary(groups: (""), show-all: true, theme: glossy-theme)
   #pagebreak()  
 ]
 

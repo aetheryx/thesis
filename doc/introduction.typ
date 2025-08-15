@@ -63,4 +63,4 @@ The second chapter contains the background research necessary to provide answers
 
 The third, fourth and fifth chapters form the core content of this research paper. Each of these chapters answer their respective sub-questions, and each of these core chapters start with an introduction and end with a conclusion. The third chapter investigates performance impact in a theoretical sense: specifically, it measures how Hyperdisks affect the raw disk performance of Uber's @cde:short:pl, and hypothesizes how raw disk performance could theoretically affect real-world performance. The fourth chapter investigates performance impact in a practical sense, where the build duration of real-world projects is compared between Hyperdisks and Persistent Disks. Lastly, the fifth chapter investigates Hyperdisk Storage Pools, which are a Hyperdisk-specific feature that claims to optimize disk capacity utilization.
 
-Lastly, the sixth chapter provides a conclusive answer to the main question.
+Lastly, the sixth chapter provides a concluding answer to the main question.
