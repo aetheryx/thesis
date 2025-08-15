@@ -52,18 +52,25 @@ Linux-based filesystems organize data in fixed-size _blocks_ of bytes, where the
 In order to determine whether Hyperdisk Storage Pools implement block-level compression, an experiment was performed. The goal of the experiment is to measure the data reduction ratio across varying levels of data repetition at the block level. More specifically, each iteration of the experiment generates a repeating pattern of randomized bytes of a specific size, and then repeats this pattern to fill an 8 GiB file. This 8 GiB file is then duplicated across 8 disks in the pool (totaling $8 "GiB" dot 8 = 64 "GiB"$). Each iteration of the experiment is performed with a different size for the repeating pattern, specifically the powers-of-two from $2^4$ (16) to $2^13$ (8192). 
 
 The results of the experiment are visualised as follows:
-#align(center)[#image("images/block-comp.png", width: 115%)]
+#figure(
+  image("images/block-comp.png", width: 115%),
+  caption: [Data reduction ratio with varying size of a randomized repeating pattern]
+)
 
 These results clearly indicate that Hyperdisk Storage Pools apply block-level compression. Firstly, observe that for the pattern sizes of 4096 and 8192 bytes, no data reduction is observed. This implies that the underlying file system is configured with a block size of 4096 bytes, as there is no compression when the source pattern exceeds 4096 bytes. Secondly, observe that the data reduction ratio approximately scales with the amount of times the pattern fits in the block size. More specifically, the compressed size consistently follows the theoretical compressed size based on the block-to-pattern ratio, plus 1 GiB:
-#table(
-  columns: 4,
-  [Pattern size], [Block-pattern ratio], [Theoretical compressed size], [Actual compressed size],
-  [64], [64 (4096:64)], [1 GiB (64 GiB / 64)], [2.00 GiB],
-  [128], [32 (4096:128)], [2 GiB (64 GiB / 32)], [3.00 GiB],
-  [256], [16 (4096:256)], [4 GiB (64 GiB / 16)], [5.00 GiB],
-  [512], [8 (4096:512)], [8 GiB (64 GiB / 8)], [9.00 GiB],
-  [1024], [4 (4096:1024)], [16 GiB (64 GiB / 4)], [17.00 GiB],
-  [2048], [2 (4096:2048)], [32 GiB (64 GiB / 2)], [33.00 GiB],
+
+#figure(
+  table(
+    columns: 4,
+    [Pattern size], [Block-pattern ratio], [Theoretical compressed size], [Actual compressed size],
+    [64], [64 (4096:64)], [1 GiB (64 GiB / 64)], [2.00 GiB],
+    [128], [32 (4096:128)], [2 GiB (64 GiB / 32)], [3.00 GiB],
+    [256], [16 (4096:256)], [4 GiB (64 GiB / 16)], [5.00 GiB],
+    [512], [8 (4096:512)], [8 GiB (64 GiB / 8)], [9.00 GiB],
+    [1024], [4 (4096:1024)], [16 GiB (64 GiB / 4)], [17.00 GiB],
+    [2048], [2 (4096:2048)], [32 GiB (64 GiB / 2)], [33.00 GiB],
+  ),
+  caption: [Data reduction results with varying size of a randomized repeating pattern]
 )
 
 The exact reason for the additional 1 GiB is unknown, but not unexpected, nor relevant to overall conclusions drawn from the results.

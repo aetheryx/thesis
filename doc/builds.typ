@@ -52,10 +52,13 @@ Additionally, the process to measure a single build execution is defined as foll
 + For each build, the remote dependencies in the target graph are pre-fetched. This ensures that results do not rely on network performance, as the reliability of external package registries would influence results incorrectly.
 + For each build, the measurement is taken using the `time` command-line tool found on most standard Linux systems.
 
-== Results
+== Build performance results
 The results of the experiment are visualised as follows:
 
-#align(center)[#image("images/build_perf.png", width: 120%)]
+#figure(
+  image("images/build_perf.png", width: 120%),
+  caption: [Build durations of sampled projects across all monorepos]
+)
 
 From these results, there are a number of initial observations to make. Firstly, the results indicate that for the Golang, Web, Python and Android monorepos, build time is negligibly affected by Hyperdisks. Considering that the PD configuration has more than 10 times the IOPS as the minimum Hyperdisk configuration, this is somewhat unexpected. Secondly, the results indicate that the Java monorepo is affected by the reduction in IOPS, unlike the other monorepos. The remainder of this section elaborates on the root cause for these observations.
 
@@ -89,7 +92,11 @@ The `~/.cache/bazel` directory used by the minimally impacted monorepos is mount
 This deviation in the configuration for the Java monorepo explains why it is impacted by the reduction in raw disk performance: for the Java monorepo, the network-attached disk is utilized fully for the build output, meaning that the performance of the network-attached disk is much more relevant. To confirm this theory, the Java @cde:short:pl were configured to mount the `~/.java_bazelcache` directory on the locally-attached disk.
 
 With this change in place, the build times for the Java monorepo are measured again and visualised as follows:
-#align(center)[#image("images/build-java.png", width: 120%)]
+
+#figure(
+  image("images/build-java.png", width: 120%),
+  caption: [Project build durations in the Java monorepo, ephemeral vs. local storage]
+)
 
 With the improved configuration in place, the Java monorepo behaves the same way as the other monorepos: the reduction in disk performance does not affect build performance.
 

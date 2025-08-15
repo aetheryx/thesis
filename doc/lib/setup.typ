@@ -7,6 +7,10 @@
   )
   set page(numbering: "1")
 
+  show heading.where(level: 3) : set heading(bookmarked: false)
+  show heading.where(level: 4) : set heading(bookmarked: false)
+  show heading.where(level: 5) : set heading(bookmarked: false)
+
   show link: set text(rgb("#0857c9"))
   // show ref.where(): set text(rgb("#0857c9"))
   show ref: it => {

@@ -19,7 +19,10 @@ In order to demonstrate burstability, an experiment was performed with the goal 
 \
 
 The results of this experiment are visualised as follows:
-#align(center)[#image("images/perf_burst.png", width: 120%)]
+#figure(
+  image("images/perf_burst.png", width: 120%),
+  caption: [Execution time with varying amount of active CDEs]
+)
 
 A number of observations can be drawn from these results. Firstly, for @cde:short:pl using pooled performance, there is a correlation between the amount of idle neighbors and the reduction in execution time: the more neighbors are idle, the lower the execution time is. Secondly, for @cde:short:pl using static performance, the execution time is not impacted by the idle-active distribution: no matter the amount of idle neighbors, @cde:short:pl using static performance perform the task in a consistent time. Thirdly, when all @cde:short:pl are active, the execution time of both pooled performance and static performance is nearly equal.
 
@@ -32,7 +35,10 @@ The first advantage of static performance is the fact that performance allocatio
 In order to investigate the fairness of the resource redistribution algorithm, an experiment was performed with the goal of understanding how execution time is impacted when the performance scheduler needs to redistribute allocated resources. The task measured is the execution time to write 1 GiB of randomized data to the disk. For each measurement, one CDE executed the task for measurement, and a varying amount of @cde:short:pl acted as noisy neighbors. As previously mentioned, a noisy neighbor is a resource consumer within the same pool that is already occupying performance resources prior to the start of the task execution. Noisy neighbors were simulated by instructing them to continuously write randomized data to the disk as fast as possible, effectively attempting to use as many performance resources as available.
 
 The results of this experiment are visualised as follows:
-#align(center)[#image("images/perf_neighbor.png", width: 120%)]
+#figure(
+  image("images/perf_neighbor.png", width: 120%),
+  caption: [Execution time with varying amount of noisy neighboring CDEs],
+)
 
 In the graph above, noisy neighbors have a negative impact on execution time when using pooled performance: as the amount of noisy neighbors grows, execution time increases significantly, indicating that the performance scheduler for Persistent Disks does not redistribute allocated resources fairly. As expected, the group using static performance provisioning is not impacted by noisy neighbors whatsoever: the execution time using static performance is nearly equal in all scenarios.
 
@@ -42,14 +48,19 @@ Suppose that noisy neighbors are not necessarily a problem and applications are 
 In order to investigate the consistency of performance allocations, an experiment simulated a consistently sized, distributed workload: each CDE in each pool performed the task continuously, and the task is the same across all @cde:short:pl, namely writing 4 GiB of data to the disk. The simulation was run continuously for 180 minutes, measuring the execution time of each execution.
 
 The experiment collected a total of 750 samples. The results are visualised as follows:
-#image("images/distrib.png")
-#align(center)[#table(
-  columns: 6,
-  [], [Min.], [Median], [Max.], [Range], [Std. Dev.],
-
-  [Persistent Disk], [105,52], [108,14], [110,74], [5,22], [1,09],
-  [Hyperdisk], [108,05], [108,10], [108,12], [0,07], [0,02]
-)]
+#figure(
+  [
+    #image("images/distrib.png")
+    #table(
+      columns: 6,
+      [], [Min.], [Median], [Max.], [Range], [Std. Dev.],
+    
+      [Persistent Disk], [105,52], [108,14], [110,74], [5,22], [1,09],
+      [Hyperdisk], [108,05], [108,10], [108,12], [0,07], [0,02]
+    )
+  ],
+  caption: [Occurrence distribution of execution time]
+)
 
 From these results, pooled performance significantly impacts the consistency of resource availability. For both performance provisioning models, the median execution time is nearly equal at around 108,1 seconds. For Persistent Disks, the min-max range is 5,22 seconds and the standard deviation is 1,09 seconds. Hyperdisks prove to perform much more consistently, with a min-max range of only 0,07 seconds and a standard deviation of 0,02 seconds.
 
@@ -62,7 +73,10 @@ Up until now, the previous sections of this chapter have presented experiment re
 The first advantage of pooled performance is the ability to share resources for bursty workloads. When it comes to the utilization pattern of @cde:short:pl, it is commonly understood that they are bursty #cite(<potter-2024>). Typically, engineers have their CDE open throughout the day, but the majority of this time is spent on idle tasks such as writing code or reading documentation. It is only when engineers actively compile projects or run test suites that @cde:short:pl require performance, and these tasks often have short durations.
 
 As an example, consider the following utilization graph of one of Uber's @cde:short:pl:
-#align(center)[#image("images/cpu-example.png", width: 115%)]
+#figure(
+  image("images/cpu-example.png", width: 115%),
+  caption: [Sampled CPU utilization graph over 1 working day]
+)
 
 While this is just one example, it clearly demonstrates the bursty utilization pattern. The majority of time is spent idling as the engineer works on smaller tasks, and a number of larger bursts are observed when the engineer needs to compile projects to run them.
 
