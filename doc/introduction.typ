@@ -41,7 +41,7 @@ Before an answer to the main question can be provided, a number of background re
 With the background research in place, the following sub-questions are formulated in order to provide an answer to the main question:
 #box(inset: (left: 18pt))[
   + _"How do the differences in the performance provisioning models of Persistent Disks and Hyperdisks impact the raw disk performance of Uber's CDE?"_
-  + _"How does migrating Uber's CDE from Persistent Disks to Hyperdisks affect the build duration of projects?"_
+  + _"How does migrating Uber's CDE from Persistent Disks to Hyperdisks affect the build duration of projects in monorepos?"_
   + _"How do Hyperdisk Storage Pools affect disk capacity utilization compared to Persistent Disks?"_
 ]
 
