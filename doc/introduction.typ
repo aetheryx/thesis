@@ -26,7 +26,7 @@ There are many architectural similarities between Uber's @cde:short:pl and the l
 Currently, the @cde:short:pl are provisioned with Persistent Disks, a form of network-attached block storage offered by the cloud provider. Recently, the cloud provider has introduced a new type of network-attached disk known as a Hyperdisk #cite(<gcp-hd-overview>). The topic of this research is investigating a migration from Persistent Disks to Hyperdisks for Uber's CDE.
 
 == Problem Statement
-Now that the application and it's relevance to disk performance has been introduced, the problem statement of this research is defined as follows.
+Now that the application and its relevance to disk performance has been introduced, the problem statement of this research is defined as follows.
 
 Uber's @cde:short is a cloud-based application used by engineers to develop codebases in monorepos. Currently, the @cde:short:pl provision a form of storage known as a Persistent Disk to store user files. The cloud provider has recently announced a new type of disk known as a Hyperdisk, and Uber would like to investigate a migration from Persistent Disks to Hyperdisks. More specifically, Uber needs a thorough understanding of what the fundamental differences between the disk types are, and how the performance of Uber's CDE is impacted by the migration. Additionally, Hyperdisks offer specific features such as storage capacity pooling, and Uber would like to understand how effective these features are for Uber's CDE.
 
