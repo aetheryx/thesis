@@ -8,7 +8,7 @@
 #set heading(numbering: (..nums) => {
    numbering("A:", ..nums.pos().slice(1))
 })
-== Supplementary Repository
+== Supplementary Repository <git_repo>
 The GitHub repository for this thesis (#link("https://github.com/aetheryx/thesis")[github.com/aetheryx/thesis]) provides various supplementary files for reference, including the advanced data aggregation scripts, data visualisations and statistical analysis, and the content of this research paper.
 
 == PD Storage Class <k8s_pdsc>
@@ -176,4 +176,23 @@ This query returns a flattened metric that returns a high signal when noisy neig
   ) > 40000
 ) * vector(0)) + vector(1)
 or vector(0)
+```
+
+== Bazel output directories <bazel_out>
+The configuration for all minimally impacted monorepos is as follows:
+```bash
+$ bazel info output_base
+"/home/user/.cache/bazel/_bazel_user/b97476"
+$ findmnt -T $(bazel info output_base)
+TARGET                  SOURCE
+/home/user/.cache/bazel /dev/md0
+```
+
+And the configuration for the Java monorepo is as follows:
+```bash
+$ bazel info output_base
+"/home/user/.java_bazelcache/workspace/156927"
+$ findmnt -T $(bazel info output_base)
+TARGET     SOURCE
+/home/user /dev/nvme0n5
 ```

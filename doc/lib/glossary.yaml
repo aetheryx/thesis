@@ -14,3 +14,13 @@ monorepo:
 kubernetes:
   short: "Kubernetes"
   description: "An orchestration system for containerised applications. https://kubernetes.io/"
+
+pd:
+  short: "PD"
+  long: "Persistent Disk"
+  description: "A form of network-attached block storage that can be attached to virtual machines on the Google Cloud Compute platform."
+
+hd:
+  short: "HD"
+  long: "Hyperdisk"
+  description: "Similar to a Persistent Disk, a form of network-attached block storage with certain fundamental differences."

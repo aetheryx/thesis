@@ -66,7 +66,7 @@ It is important to remember that this research focuses on the comparison between
 
 Recall from @both_disks that the locally-attached disk is used for the build output, and the network-attached disk is used to store the source code repository. Each of these disks serve specific purposes during a build. As the network-attached storage holds the contents of the repository, the source code files in the repository are read so that they can be compiled. And as the locally-attached storage holds the build outputs, compiled targets are written to the locally-attached storage, as well as being read from the locally-attached storage when they are consumed as a dependency.
 
-In order to compare the relevance of the locally-attached disk and the network-attached disk, the `strace` Linux profiling tool can be used to intercept the low-level system calls made by @bazel. Further analysis can then be performed on the recorded system calls, in order to quantify the utilization of each disk. The scripts used to generate these traces and analyze them are available in the GitHub repository at #link("https://github.com/aetheryx/thesis/tree/main/strace")[`thesis/strace`]. 
+In order to compare the relevance of the locally-attached disk and the network-attached disk, the `strace` Linux profiling tool can be used to intercept the low-level system calls made by Bazel. Further analysis can then be performed on the recorded system calls, in order to quantify the utilization of each disk. The scripts used to generate these traces and analyze them are available in the GitHub repository at #link("https://github.com/aetheryx/thesis/tree/main/strace")[`thesis/strace`]. 
 
 The following table describes an aggregated comparison of the disk-related system calls made, categorized by the disk type:
 #table(
@@ -80,27 +80,11 @@ The following table describes an aggregated comparison of the disk-related syste
 Comparing the locally-attached disk to the network-attached disk, there were over 100 times more bytes read, and nearly 190.000 times more bytes written. It is clear that during a build, the build output directory receives an order of magnitude more disk operations compared to the repository directory. This explains why the Golang, Web, Python and Android monorepos are minimally affected by the reduction in disk performance for the network-attached disk: this disk is simply not used nearly as much as the locally-attached disk that stores the build output, therefore minimally impacting the overall build performance.
 
 === The Java monorepo
-The results of the experiment indicated that the Golang, Web, Python and Android were minimally impacted by the reduction in disk performance, but the Java monorepo did observe a considerable impact.
+The previous section provided an answer for the minimally impacted monorepos: they were minimally impacted because they were configured to use locally-attached disks for build outputs, making the network-attached disk less relevant. The reason the Java monorepo behaves differently is due to it's configuration: the configuration for the Java monorepo deviates. 
 
-The previous section provided an answer for the minimally impacted monorepos: they were minimally impacted because they were configured to use locally-attached disks for build outputs, making the network-attached disk less relevant. The reason the Java monorepo behaves differently is due to it's configuration: the configuration for the Java monorepo deviates. The configuration for all minimally impacted monorepos is as follows:
-```bash
-$ bazel info output_base
-"/home/user/.cache/bazel/_bazel_user/b97476"
-$ findmnt -T $(bazel info output_base)
-TARGET                  SOURCE
-/home/user/.cache/bazel /dev/md0
-```
+For the minimally impacted monorepos, the output directory for build artifacts #cite(<google-developers-2025>) is configured to be under the `~/.cache/bazel` directory. However, for the Java monorepo, it's output directory is configured to be under the `~/.bazel_javacache` directory. The exact paths are available in @bazel_out for reference.
 
-And the configuration for the Java monorepo is as follows:
-```bash
-$ bazel info output_base
-"/home/user/.java_bazelcache/workspace/156927"
-$ findmnt -T $(bazel info output_base)
-TARGET     SOURCE
-/home/user /dev/nvme0n5
-```
-
-The other monorepos are configured to use the `~/.cache/bazel` directory for build outputs, which is mounted on the `/dev/md0` block device, which is the locally-attached disk. However, the Java monorepo has overridden the build output directory to `~/.java_bazelcache`, which is not mounted on the locally-attached disk. As it falls under the home directory, it is effectively using the network-attached disk `/dev/nvme0n5`.
+The `~/.cache/bazel` directory used by the minimally impacted monorepos is mounted on the `/dev/md0` block device, which is the locally-attached disk. However, the `~/.java_bazelcache` directory configured by the Java monorepo is not mounted on the locally-attached disk. As it falls under the home directory, it is effectively using the network-attached disk.
 
 This deviation in the configuration for the Java monorepo explains why it is impacted by the reduction in raw disk performance: for the Java monorepo, the network-attached disk is utilized fully for the build output, meaning that the performance of the network-attached disk is much more relevant. To confirm this theory, the Java @cde:short:pl were configured to mount the `~/.java_bazelcache` directory on the locally-attached disk.
 

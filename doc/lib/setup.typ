@@ -8,7 +8,17 @@
   set page(numbering: "1")
 
   show link: set text(rgb("#0857c9"))
+  // show ref.where(): set text(rgb("#0857c9"))
+  show ref: it => {
+    if it.element != none {
+      set text(rgb("#0857c9"))
+      it 
+    } else {
+      it
+    }
+  }
   show cite: set text(rgb("#0857c9"))
+  show footnote: set text(rgb("#0857c9"))
 
   // set up codly
   import "@preview/codly:1.3.0": *
