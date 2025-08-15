@@ -5,8 +5,77 @@
 #set heading(outlined: false)
 
 = Appendix
-== FIO commands <appendix_fio>
-=== Base configuration
+#set heading(numbering: (..nums) => {
+   numbering("A:", ..nums.pos().slice(1))
+})
+== Supplementary Repository
+The GitHub repository for this thesis (#link("https://github.com/aetheryx/thesis")[github.com/aetheryx/thesis]) provides various supplementary files for reference, including the advanced data aggregation scripts, data visualisations and statistical analysis, and the content of this research paper.
+
+== PD Storage Class <k8s_pdsc>
+#codly(header: align(center)[*persistent-disk.StorageClass.yaml*])
+```yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: persistent-disk
+parameters:
+  type: pd-ssd # Specifies the Persistent Disk type for the cloud provider
+```
+
+== PD PVC <k8s_pdpvc>
+#codly(header: align(center)[*my-pvc.PersistentVolumeClaim.yaml*])
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-pvc
+spec:
+  storageClassName: persistent-disk # Refers to the storage class above
+  resources:
+    requests:
+      storage: 256 GiB # Creates a 256 GiB disk
+```
+
+== HD Storage Class <k8s_hdsc>
+#codly(header: align(center)[*hyperdisk.StorageClass.yaml*])
+```yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: hyperdisk
+parameters:
+  type: hyperdisk-balanced
+  provisioned-iops-on-create: "3000"
+  provisioned-throughput-on-create: "140Mi"
+```
+
+== HD Storage Class Pool <k8s_hdsc_pool>
+#codly(header: align(center)[*hyperdisk.StorageClass.yaml*])
+```diff
+ parameters:
+   type: hyperdisk-balanced
++  storage-pool: "projects/hva/zones/europe-west/storagePools/my-pool"
+```
+
+== Creating a pool <gcloud_pool>
+#codly(header: align(center)[*create-pool.sh*])
+```bash
+gcloud compute storage-pools create "my-pool" \
+    --project=hva --zone=europe-west4 \
+    --storage-pool-type=hyperdisk-balanced \
+    --provisioned-capacity=10240 # Capacity in GiB
+```
+
+== PVC change <pvc_change>
+#codly(header: align(center)[*my-pvc.PersistentVolumeClaim.yaml*])
+```diff
+ spec:
+-   storageClassName: persistent-disk
++   storageClassName: hyperdisk
+```
+
+
+== FIO Base configuration <appendix_fio>
 These configuration parameters are applied to all `fio` executions for this research.
 #codly(header: align(center)[*fio-base.ini*])
 ```ini
@@ -47,7 +116,7 @@ iodepth_batch_complete_max = 256
 disable_bw = 1
 ```
 
-=== Writing a finite amount of randomized data
+== FIO Finite amount
 The following `fio` job file is used to write 4 GiB of randomized data:
 #codly(header: align(center)[*fio-write.ini*])
 ```ini
@@ -60,7 +129,7 @@ blocksize = 4K
 size = 4G
 ```
 
-=== Writing randomized data indefinitely
+== FIO Indefinite amount
 The following `fio` job file is used to write randomized data indefinitely, effectively simulating a noisy neighbor:
 #codly(header: align(center)[*fio-noisy-neighbor.ini*])
 ```ini
@@ -78,8 +147,7 @@ time_based = 1
 runtime = 1000d
 ```
 
-== Prometheus queries 
-=== Measuring individual noisy neighbors <prom_disks>
+== Prometheus: Individual noisy neighbors <prom_disks>
 This query selects individual disks that have a resource usage above 40.000 IOPS.
 #codly(header: align(center)[*noisy-neighbors.promql*])
 ```promql
@@ -93,7 +161,7 @@ sum by (device_name) (
 ) > 40000
 ```
 
-=== Measuring occurrences of any noisy neighbors <prom_flat>
+== Prometheus: Any noisy neighbors <prom_flat>
 This query returns a flattened metric that returns a high signal when noisy neighbors were observed, and a low signal when no noisy neighbors were observed.
 #codly(header: align(center)[*noisy-neighbors.promql*])
 ```promql

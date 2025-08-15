@@ -60,68 +60,16 @@ The `StorageClass` resource defines a specific class of storage that the applica
 The `PersistentVolumeClaim` resource represents a specific provisioned disk. This resource defines which `StorageClass` is to be used, as well as the disk capacity for the disk and related properties.
 
 === Current Persistent Disk configuration
-Currently, the application has a static `StorageClass` resource that specifies the Persistent Disk type. This storage class can be defined as follows:
-#codly(header: align(center)[*persistent-disk.StorageClass.yaml*])
-```yaml
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: persistent-disk
-parameters:
-  type: pd-ssd # Specifies the Persistent Disk type for the cloud provider
-```
-
-As new instances of the application are provisioned, a `PersistentVolumeClaim` resource is created, and this `PersistentVolumeClaim` specifies that the Persistent Disk storage class should be used as follows:
-#codly(header: align(center)[*my-pvc.PersistentVolumeClaim.yaml*])
-```yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: my-pvc
-spec:
-  storageClassName: persistent-disk # Refers to the storage class above
-  resources:
-    requests:
-      storage: 256 GiB # Creates a 256 GiB disk
-```
+Currently, the application has a static `StorageClass` resource that specifies the Persistent Disk type, which is available in @k8s_pdsc for reference. As new instances of the application are provisioned, a `PersistentVolumeClaim` resource is created. An example of this resource is available in @k8s_pdpvc for reference.
 
 === Provisioning Hyperdisks <provisioning_hd>
-In order to implement Hyperdisks, a new storage class is created. This storage class specifies that the underlying disk type is a Hyperdisk. Additionally, the storage class defines a number of properties specific to Hyperdisks. The performance resources are defined, meaning the number of IOPS and the throughput in MiBps. This new storage class can be defined as follows:
-#codly(header: align(center)[*hyperdisk.StorageClass.yaml*])
-```yaml
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: hyperdisk
-parameters:
-  type: hyperdisk-balanced
-  provisioned-iops-on-create: "3000"
-  provisioned-throughput-on-create: "140Mi"
-```
+In order to implement Hyperdisks, a new storage class is created. This storage class specifies that the underlying disk type is a Hyperdisk. Additionally, the storage class defines a number of properties specific to Hyperdisks. The performance resources are defined, meaning the number of IOPS and the throughput in MiBps. The definition of the resource is available in @k8s_hdsc for reference.
 
-If Hyperdisk Storage Pools are used, the storage class for Hyperdisks must additionally specify the name of the storage pool that disks using the storage class should be attached to.
-#codly(header: align(center)[*hyperdisk.StorageClass.yaml*])
-```diff
- parameters:
-   type: hyperdisk-balanced
-+  storage-pool: "projects/hva/zones/europe-west/storagePools/my-pool"
-```
+If Hyperdisk Storage Pools are used, the storage class for Hyperdisks must additionally specify the name of the storage pool that disks using the storage class should be attached to, by defining the `storage-pool` property. An example of this change is available in @k8s_hdsc_pool for reference.
 
-Additionally, in this case, the storage pool itself must be provisioned. As Hyperdisk Storage Pools are a concept specific to the cloud provider, they cannot be provisioned through Kubernetes. Hyperdisk Storage Pools can be created using the `gcloud` command line tool as follows:
-```bash
-gcloud compute storage-pools create "my-pool" \
-    --project=hva --zone=europe-west4 \
-    --storage-pool-type=hyperdisk-balanced \
-    --provisioned-capacity=10240 # Capacity in GiB
-```
+Additionally, in this case, the storage pool itself must be provisioned. As Hyperdisk Storage Pools are a concept specific to the cloud provider, they cannot be provisioned through Kubernetes. Hyperdisk Storage Pools can be created using the `gcloud` command line tool, with an exact command available at @gcloud_pool. 
 
-Once the storage class is created, the PersistentVolumeClaims that the application creates can specify the new storage class as follows:
-#codly(header: align(center)[*my-pvc.PersistentVolumeClaim.yaml*])
-```diff
- spec:
--   storageClassName: persistent-disk
-+   storageClassName: hyperdisk
-```
+Once the storage class is created, the PersistentVolumeClaims that the application creates can specify the new storage class by changing the `storageClassName` property. An example of this change is available for reference at @pvc_change. 
 
 With these changes in place, the application provisions Hyperdisks instead of Persistent Disks.
 
