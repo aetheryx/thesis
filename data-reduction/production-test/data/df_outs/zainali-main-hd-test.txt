@@ -1,0 +1,2 @@
+Filesystem      1K-blocks      Used  Available Use% Mounted on
+/dev/nvme23n1   263112772 193658364   69438024  74% /mnt/test-disks/zainali-main-hd-test

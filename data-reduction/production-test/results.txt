@@ -1,0 +1,10 @@
+% zx ./scripts/results.js
+┌──────────────────────────┬───────────────┐
+│ (index)                  │ Values        │
+├──────────────────────────┼───────────────┤
+│ Old total capacity       │ '191,232 GiB' │
+│ User bytes written (df)  │ '59,108 GiB'  │
+│ Pool usage               │ '54,888 GiB'  │
+│ Compression reduction    │ '-7.14%'      │
+│ Total capacity reduction │ '-71.30%'     │
+└──────────────────────────┴───────────────┘

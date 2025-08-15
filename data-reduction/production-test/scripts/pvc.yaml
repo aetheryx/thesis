@@ -1,0 +1,40 @@
+#@ load("@ytt:data", "data")
+#@ disk = data.values.disk
+#@ size = data.values.size
+#@ diskPath = data.values.diskPath
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: #@ disk + "-pv"
+  labels:
+    hd-test: "true"
+spec:
+  storageClassName: "hyperdisk-experimentation-v1"
+  capacity:
+    storage: #@ size
+  accessModes:
+    - ReadWriteOnce
+  claimRef:
+    name: #@ disk + "-pvc"
+    namespace: hyperdisk-experimentation
+  csi:
+    driver: pd.csi.storage.gke.io
+    volumeHandle: #@ diskPath
+    fsType: ext4
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: hyperdisk-experimentation
+  name: #@ disk + "-pvc"
+  labels:
+    hd-test: "true"
+spec:
+  storageClassName: "hyperdisk-experimentation-v1"
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: #@ size

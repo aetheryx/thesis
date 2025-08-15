@@ -107,7 +107,7 @@ For simplicity, this experiment was executed in only one datacenter of Uber's CD
 
 More specifically, the experiment executes the following steps:
 + Create a Hyperdisk Storage Pool in the same region as the datacenter
-+ Select all CDEs in the region that were used in the past 14 days
++ Select all running CDEs in the region that are older than 24 hours
 + For each CDE, select its most recent snapshot
 + From each of these snapshots, provision a Hyperdisk with the same capacity in the storage pool
 + Mount each of the disks to measure the amount of uncompressed bytes stored on the disks

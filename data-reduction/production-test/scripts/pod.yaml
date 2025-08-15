@@ -1,0 +1,31 @@
+#@ load("@ytt:data", "data")
+#@ nodeIdx = data.values.nodeIdx
+#@ disk = data.values.disk
+#@ diskIdx = data.values.diskIdx
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: #@ "ingest-pod-" + str(diskIdx)
+  namespace: hyperdisk-experimentation
+  labels:
+    hd-test: "true"
+spec:
+  restartPolicy: Never
+  containers:
+  - name: df
+    image: debian:latest
+    command: [df]
+
+    volumeMounts:
+      - name: #@ disk
+        mountPath: #@ "/mnt/test-disks/" + disk
+
+  nodeSelector:
+    hd-test-idx: #@ str(nodeIdx)
+
+  volumes:
+    - name: #@ disk
+      persistentVolumeClaim:
+        claimName: #@ disk + "-pvc"
