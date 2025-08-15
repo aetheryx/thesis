@@ -1,13 +1,13 @@
 #import "lib/setup.typ": setup
 #show: setup
 
-= Impact of performance provisioning models <perf_prov>
+= Impact on raw disk performance <perf_prov>
 This chapter answers the _"How do the differences in the performance provisioning models of Persistent Disks and Hyperdisks impact the raw disk performance of Uber's CDE?"_ sub-question. As previously mentioned in @perf_model, the fundamental difference between the performance provisioning models is that Persistent Disks share a pool of performance resources (known as "pooled performance") and Hyperdisks provision performance statically per disk (known as "static performance"). The chapter further investigates the advantages and disadvantages between the two performance provisioning models, in order to determine how they affect raw disk performance. It is important to note that the performance provisioning models are merely one aspect of the disks: in subsequent chapters, other characteristics are investigated.
 
 == Background research: Measuring raw disk performance
 This chapter investigates raw disk performance in various scenarios, by performing a number of experiments. In this section, the technical details of how these experiments are generally performed are briefly described.
 
-First, the way raw disk performance is measured is using the `fio` command-line tool (#link("https://github.com/axboe/fio")), which provides the ability to perform synthetic disk operations and measure their execution time. For example, the `fio` tool can be instructed to write 1 GiB of randomized data to a specific file, and the time taken for this execution can be measured. The specific configuration parameters are included in full in #link(<appendix_fio>)[Appendix H].
+First, the way raw disk performance is measured is using the `fio` command-line tool (#link("https://github.com/axboe/fio")[github.com/axboe/fio]), which provides the ability to perform synthetic disk operations and measure their execution time. For example, the `fio` tool can be instructed to write 1 GiB of randomized data to a specific file, and the time taken for this execution can be measured. The specific configuration parameters are included in full in #link(<appendix_fio>)[Appendix H].
 
 Second, the experiments are commonly configured as follows. In this chapter, all experiments provision two isolated groups of @cde:short:pl: one group using Persistent Disks (pooled performance), and one group using Hyperdisks (static performance). Each group contains 4 @cde:short:pl each. The group using Persistent Disks has a performance pool of 38.640 IOPS in total, shared by 4 @cde:short:pl. For the group using Hyperdisks, each CDE is provisioned with 9.660 IOPS, meaning both groups have an equal amount of total IOPS.
 
@@ -15,8 +15,6 @@ Second, the experiments are commonly configured as follows. In this chapter, all
 The primary advantage of pooled performance is _burstability_. Consider a distributed application where each instance of the application consumes resources at short-lived, uncorrelated intervals (known as _bursts_). In this situation, active instances of the application can effectively borrow performance resources from their idle neighbors, allowing for faster completion of tasks.
 
 In order to demonstrate burstability, an experiment was performed with the goal of understanding how execution time is impacted by the amount of active @cde:short:pl. The task that was measured is writing 4 GiB of randomized data to the disk. For each CDE group, the task execution time was measured, with a varying amount of @cde:short:pl that are either performing the task or being idle. Executions are started at the same time within each group: for example, when measuring the execution time with 3 active @cde:short:pl, all 3 @cde:short:pl start the task at the same time.
-
-\
 
 The results of this experiment are visualised as follows:
 #figure(
@@ -95,14 +93,17 @@ Over the past 14 days, this query returns the following graph data:
 Visually, noisy neighbors are not a frequent occurrence. The raw data for this query can be further analyzed to measure the number of occurrences and their durations. The script for this analysis is available in the GitHub repository at #link("https://github.com/aetheryx/thesis/tree/main/noise")[`thesis/noise`].
 
 The results of the analysis are as follows:
-#table(
-  columns: 2,
-  [Metric], [Value],
-
-  [Amount of occurrences], [40],
-  [Minimum duration], [5 minutes],
-  [Mean duration], [7,5 minutes],
-  [Maximum duration], [20 minutes],
+#figure(
+  table(
+    columns: 2,
+    [Metric], [Value],
+  
+    [Amount of occurrences], [40],
+    [Minimum duration], [5 minutes],
+    [Mean duration], [7,5 minutes],
+    [Maximum duration], [20 minutes],
+  ),
+  caption: [Analysed occurrences of noisy neighbors]
 )
 
 It is worth noting that the time intervals were downsampled by the query engine, as this data is being queried over a large timeframe (14 days). Regardless, the analysis indicates that noisy neighbors are not a frequent occurrence. The Europe region for Uber's CDE contains approximately 50 virtual machines, each with a dedicated resource pool. Over the course of 14 days, 40 occurrences of noisy neighbors were observed across all 50 of these virtual machines, and the mean duration for noisy neighbor activity was only 7,5 minutes.

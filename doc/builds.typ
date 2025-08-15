@@ -60,24 +60,27 @@ The results of the experiment are visualised as follows:
   caption: [Build durations of sampled projects across all monorepos]
 )
 
-From these results, there are a number of initial observations to make. Firstly, the results indicate that for the Golang, Web, Python and Android monorepos, build time is negligibly affected by Hyperdisks. Considering that the PD configuration has more than 10 times the IOPS as the minimum Hyperdisk configuration, this is somewhat unexpected. Secondly, the results indicate that the Java monorepo is affected by the reduction in IOPS, unlike the other monorepos. The remainder of this section elaborates on the root cause for these observations.
+From these results, there are a number of initial observations to make. Firstly, the results indicate that for the Golang, Web, Python and Android monorepos, build time is negligibly affected by Hyperdisks. Considering that the Persistent Disk configuration has more than 10 times the IOPS as the minimum Hyperdisk configuration, this is somewhat unexpected. Secondly, the results indicate that the Java monorepo is affected by the reduction in IOPS, unlike the other monorepos. The remainder of this section elaborates on the root cause for these observations.
 
 === Unaffected monorepos
-As previously stated, the Golang, Web, Python and Android monorepos are minimally affected by the reduction in disk performance, which is unexpected considering that the PD configuration has more than 10 times the IOPS. As observed in the results above, the Golang and Web monorepos are nearly identical: for Golang, the Persistent Disk and PD-equivalent Hyperdisk configuration performed identically, and the minimum Hyperdisk configuration was 0,3% slower. In the Python and Android monorepos, the differences are slightly larger, with the Python monorepo observing degradations of 0,2% and 2,4% respectively, and the Android monorepo observing degradations of 1,2% and 1,5% respectively.
+As previously stated, the Golang, Web, Python and Android monorepos are minimally affected by the reduction in disk performance, which is unexpected considering that the Persistent Disk configuration has more than 10 times the IOPS. As observed in the results above, the Golang and Web monorepos are nearly identical: for Golang, the Persistent Disk and PD-equivalent Hyperdisk configuration performed identically, and the minimum Hyperdisk configuration was 0,3% slower. In the Python and Android monorepos, the differences are slightly larger, with the Python monorepo observing degradations of 0,2% and 2,4% respectively, and the Android monorepo observing degradations of 1,2% and 1,5% respectively.
 
 It is important to remember that this research focuses on the comparison between Persistent Disks and Hyperdisks, both of which are forms of network-attached storage. However, as mentioned in @both_disks, Uber's @cde:short:pl provision another type of disk as well: the locally-attached disk. As a reminder, locally-attached disks offer significantly more performance than network-attached disks, but locally-attached disks are ephemeral while network-attached disks are persisted.
 
 Recall from @both_disks that the locally-attached disk is used for the build output, and the network-attached disk is used to store the source code repository. Each of these disks serve specific purposes during a build. As the network-attached storage holds the contents of the repository, the source code files in the repository are read so that they can be compiled. And as the locally-attached storage holds the build outputs, compiled targets are written to the locally-attached storage, as well as being read from the locally-attached storage when they are consumed as a dependency.
 
-In order to compare the relevance of the locally-attached disk and the network-attached disk, the `strace` Linux profiling tool can be used to intercept the low-level system calls made by Bazel. Further analysis can then be performed on the recorded system calls, in order to quantify the utilization of each disk. The scripts used to generate these traces and analyze them are available in the GitHub repository at #link("https://github.com/aetheryx/thesis/tree/main/strace")[`thesis/strace`]. 
+In order to compare the relevance of the locally-attached disk and the network-attached disk, the `strace` Linux profiling tool can be used to intercept the low-level system calls made by Bazel#footnote[A build system built by Google to create scalable monorepos. https://bazel.build/]. Further analysis can then be performed on the recorded system calls, in order to quantify the utilization of each disk. The scripts used to generate these traces and analyze them are available in the GitHub repository at #link("https://github.com/aetheryx/thesis/tree/main/strace")[`thesis/strace`]. 
 
 The following table describes an aggregated comparison of the disk-related system calls made, categorized by the disk type:
-#table(
-  columns: 4,
-  [], [Network-attached], [Locally-attached], [Relative increase],
-  [Files opened], [4.857], [91.339], [19x],
-  [Sum of bytes read], [73,52 MiB], [8,21 GiB], [107x],
-  [Sum of bytes written], [14,07 KiB], [2,67 GiB], [189.653x]
+#figure(
+  table(
+    columns: 4,
+    [], [Network-attached], [Locally-attached], [Relative increase],
+    [Files opened], [4.857], [91.339], [19x],
+    [Sum of bytes read], [73,52 MiB], [8,21 GiB], [107x],
+    [Sum of bytes written], [14,07 KiB], [2,67 GiB], [189.653x]
+  ),
+  caption: [Aggregated data from intercepted system calls made by Bazel]
 )
 
 Comparing the locally-attached disk to the network-attached disk, there were over 100 times more bytes read, and nearly 190.000 times more bytes written. It is clear that during a build, the build output directory receives an order of magnitude more disk operations compared to the repository directory. This explains why the Golang, Web, Python and Android monorepos are minimally affected by the reduction in disk performance for the network-attached disk: this disk is simply not used nearly as much as the locally-attached disk that stores the build output, therefore minimally impacting the overall build performance.

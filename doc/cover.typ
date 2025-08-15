@@ -78,6 +78,6 @@
 #v(2fr)
 
 #align(center + bottom)[
-  Version 0.1 \
-  30 June 2025
+  Version 1.0 \
+  14th August 2025
 ]

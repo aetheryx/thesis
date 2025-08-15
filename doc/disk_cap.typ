@@ -32,9 +32,9 @@ $C_"new" = C_"old" dot U dot (100) / T$
 where $C_"old"$ is the current provisioned capacity, $U$ is the current utilization, and $T$ is the autoscaling utilization target.
 
 Calculating these values for Uber's scenario yields the following planned capacity:\
-$C_"new" = 500 "TiB" dot 28,35% dot 100 / 90$\
-$C_"new" = 141,75 "TiB" dot 100 / 90$\
-$C_"new" = 157,5 "TiB"$
+$C_"new" = 500 "TiB" dot 28","35% dot 100 / 90$\
+$C_"new" = 141","75 "TiB" dot 100 / 90$\
+$C_"new" = 157","5 "TiB"$
 
 Effectively, thin provisioning allows Uber to reduce their total provisioned capacity from 500 TiB to 157,5 TiB, which is a reduction of 68,5%. 
 
@@ -83,16 +83,20 @@ The results from the block-level compression experiment indicate that it is unli
 However, the block-level compression experiment is highly synthetic. To confirm whether Hyperdisk Storage Pools apply deduplication, another experiment was performed, with the goal of simulating a more realistic scenario. In this experiment, a storage pool containing 6 disks was created, each provisioned with 32 GiB of capacity. A large open-source CSV dataset totaling 31.09 GB was selected as the test data (#link("https://www.kaggle.com/datasets/dilwong/flightprices")[flightprices.csv]). This dataset was downloaded to each of the disks one-by-one, and the storage pool utilization was measured in between each additional occurrence of the dataset.
 
 The results of this experiment are as follows:
-#table(
-  columns: 4,
-  [Dataset instances], [Uncompressed size], [Compressed size], [Compression ratio],
-  [1], [28.99 GiB], [12.58 GiB], [2.31:1],
-  [2], [57.95 GiB], [25.15 GiB], [2.30:1],
-  [3], [86.91 GiB], [37.72 GiB], [2.30:1],
-  [4], [115.73 GiB], [50.25 GiB], [2.30:1],
-  [5], [144.79 GiB], [62.86 GiB], [2.30:1],
-  [6], [173.46 GiB], [75.31 GiB], [2.30:1],
+#figure(
+  table(
+    columns: 4,
+    [Dataset instances], [Uncompressed size], [Compressed size], [Compression ratio],
+    [1], [28.99 GiB], [12.58 GiB], [2.31:1],
+    [2], [57.95 GiB], [25.15 GiB], [2.30:1],
+    [3], [86.91 GiB], [37.72 GiB], [2.30:1],
+    [4], [115.73 GiB], [50.25 GiB], [2.30:1],
+    [5], [144.79 GiB], [62.86 GiB], [2.30:1],
+    [6], [173.46 GiB], [75.31 GiB], [2.30:1],
+  ),
+  caption: [Compression ratio across increasing instances of 31 GiB dataset]
 )
+
 
 These results further confirm that Hyperdisk Storage Pools do not seem to apply deduplication. Observe that as the number of dataset instances increases, the compressed size grows linearly, meaning recurring data is not being deduplicated. Despite the lack of deduplication, the 2.31:1 compression ratio is still impressive for a real-world dataset.
 
@@ -110,13 +114,17 @@ More specifically, the experiment executes the following steps:
 + Measure the amount of physical bytes in use by the storage pool
 
 The results of this experiment are as follows:
-#table(
-  columns: 2,
-  [Previous total capacity], [187,75 TiB],
-  [Sum of bytes written to disks], [57,72 TiB],
-  [Physical bytes in use by the storage pool], [53,60 TiB],
-  [Minimum storage pool size], [59,56 TiB]
+#figure(
+  table(
+    columns: 2,
+    [Previous total capacity], [187,75 TiB],
+    [Sum of bytes written to disks], [57,72 TiB],
+    [Physical bytes in use by the storage pool], [53,60 TiB],
+    [Minimum storage pool size], [59,56 TiB]
+  ),
+  caption: [Results of production data evaluation],
 )
+
 
 From these results, the total capacity reduction yielded from Hyperdisk Storage Pools can be calculated. Without storage pooling, the total capacity of this set of CDEs is 187,75 TiB. When mounting each of the disks, 57,72 TiB of data written to the disks was observed. At the storage pool level, the amount of used capacity reported post-compression is 53,60 TiB, meaning that the data reduction resulted in an additional 7,13% reduction of capacity usage (1,08:1). Lastly, as the 53,60 TiB in use by the storage pool should be a 90% utilization target, the final storage pool size would be $53","60 dot 100/90 = 59","56 "TiB"$. Effectively, the total capacity reduction is $1 - (59,56)/(187,75) = 68","28%$. 
 

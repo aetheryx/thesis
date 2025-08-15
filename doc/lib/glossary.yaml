@@ -24,3 +24,18 @@ hd:
   short: "HD"
   long: "Hyperdisk"
   description: "Similar to a Persistent Disk, a form of network-attached block storage with certain fundamental differences."
+
+localdisk:
+  short: "Local disk"
+  long: "locally attached disk"
+  description: "A disk directly attached to the VM host hardware; very high performance but ephemeral, with data lost on VM restart."
+
+networkdisk:
+  short: "Network-attached disk"
+  long: "network-attached disk"
+  description: "A block storage volume connected over a network; persistent data storage with lower performance compared to local disks."
+
+storagepool:
+  short: "Storage pool"
+  long: "Hyperdisk Storage Pool"
+  description: "A pre-purchased pool of capacity and performance that multiple Hyperdisks can draw from. Capacity counts only when bytes are written to the disk."
