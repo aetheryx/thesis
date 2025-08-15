@@ -7,7 +7,7 @@ This chapter answers the _"How do the differences in the performance provisionin
 == Background research: Measuring raw disk performance
 This chapter investigates raw disk performance in various scenarios, by performing a number of experiments. In this section, the technical details of how these experiments are generally performed are briefly described.
 
-First, the way raw disk performance is measured is using the `fio` command-line tool (#link("https://github.com/axboe/fio")), which provides the ability to perform synthetic disk operations and measure their execution time. For example, the `fio` tool can be instructed to write 1 GiB of randomized data to a specific file, and the time taken for this execution can be measured. The specific configuration parameters are included in full in the Appendix (@appendix_fio).
+First, the way raw disk performance is measured is using the `fio` command-line tool (#link("https://github.com/axboe/fio")), which provides the ability to perform synthetic disk operations and measure their execution time. For example, the `fio` tool can be instructed to write 1 GiB of randomized data to a specific file, and the time taken for this execution can be measured. The specific configuration parameters are included in full in #link(<appendix_fio>)[Appendix H].
 
 Second, the experiments are commonly configured as follows. In this chapter, all experiments provision two isolated groups of @cde:short:pl: one group using Persistent Disks (pooled performance), and one group using Hyperdisks (static performance). Each group contains 4 @cde:short:pl each. The group using Persistent Disks has a performance pool of 38.640 IOPS in total, shared by 4 @cde:short:pl. For the group using Hyperdisks, each CDE is provisioned with 9.660 IOPS, meaning both groups have an equal amount of total IOPS.
 
@@ -87,7 +87,7 @@ To conclude, burstability would allow for significantly improved disk performanc
 === Isolation
 The first advantage of static performance is isolation, specifically being more resilient to noisy neighbors. In order to determine how useful resiliency against noisy neighbors is for Uber's @cde:short:pl, the past 14 days of resource usage for Uber's @cde:short:pl can be queried, to observe occurrences of noisy neighbors in a given datacenter.
 
-Using a Prometheus query, the allocated IOPS for each Persistent Disk in the region can be measured, and metrics where the allocated IOPS are above a certain threshold can be selected. Considering that Uber's @cde:short:pl share 100.000 IOPS per resource pool, a noisy neighbor is defined as an individual disk using 40% of this capacity, i.e. 40.000 IOPS. The full query is available in the Appendix (@prom_disks).
+Using a Prometheus query, the allocated IOPS for each Persistent Disk in the region can be measured, and metrics where the allocated IOPS are above a certain threshold can be selected. Considering that Uber's @cde:short:pl share 100.000 IOPS per resource pool, a noisy neighbor is defined as an individual disk using 40% of this capacity, i.e. 40.000 IOPS. The full query is available in #link(<prom_disks>)[Appendix K].
 
 Over the past 14 days, this query returns the following graph data:
 #align(center)[#rect(image("images/noisy-disks.png"), width: 120%, stroke: gray)]

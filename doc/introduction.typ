@@ -48,9 +48,9 @@ With the background research in place, the following sub-questions are formulate
 == Research Methods
 // Firstly, to understand how Hyperdisks can be provisioned, a considerable amount of desk research was performed reading through the documentation of various systems. In terms of the underlying cloud infrastructure, documentation from Google Cloud and Kubernetes proved to be relevant, and these findings are described in @disk_types_provisioned and @diff_between_pd_hd. Additionally, the architecture of Uber's @cde:short:pl was investigated in order to understand how the underlying infrastructure can be provisioned, and these findings are described in @section_prov_hd.
 
-The majority of this research consists of experiments and statistical analysis. A total of 9 experiments were conducted. As many of these experiments operate on a large scale, they are implemented as automated scripts. The source code of these scripts can be found in Appendix 1 (@git_repo).
+The majority of this research consists of experiments and statistical analysis. A total of 9 experiments were conducted. As many of these experiments operate on a large scale, they are implemented as automated scripts. The source code of these scripts can be found in #link(<git_repo>)[Appendix A].
 
-Statistical analysis is performed on the results of the experiments, specifically using mathematics libraries in Python such as `numpy` and `matplotlib`. The source code for the analysis is also available in Appendix 1 (@git_repo).
+Statistical analysis is performed on the results of the experiments, specifically using mathematics libraries in Python such as `numpy` and `matplotlib`. The source code for the analysis is also available in Appendix 1 #link(<git_repo>)[Appendix A].
 
 Additionally, some of the experiments require specific tools, such as the `fio` experiment in @perf_prov or the `strace` experiment in @build_perf. In these cases, the selection criteria for the tools is described in the context leading up to the experiment.
 

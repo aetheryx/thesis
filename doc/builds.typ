@@ -85,7 +85,7 @@ Comparing the locally-attached disk to the network-attached disk, there were ove
 === The Java monorepo
 The previous section provided an answer for the minimally impacted monorepos: they were minimally impacted because they were configured to use locally-attached disks for build outputs, making the network-attached disk less relevant. The reason the Java monorepo behaves differently is due to it's configuration: the configuration for the Java monorepo deviates. 
 
-For the minimally impacted monorepos, the output directory for build artifacts #cite(<google-developers-2025>) is configured to be under the `~/.cache/bazel` directory. However, for the Java monorepo, it's output directory is configured to be under the `~/.bazel_javacache` directory. The exact paths are available in @bazel_out for reference.
+For the minimally impacted monorepos, the output directory for build artifacts #cite(<google-developers-2025>) is configured to be under the `~/.cache/bazel` directory. However, for the Java monorepo, it's output directory is configured to be under the `~/.bazel_javacache` directory. The exact paths are available ins #link(<bazel_out>)[Appendix M] for reference.
 
 The `~/.cache/bazel` directory used by the minimally impacted monorepos is mounted on the `/dev/md0` block device, which is the locally-attached disk. However, the `~/.java_bazelcache` directory configured by the Java monorepo is not mounted on the locally-attached disk. As it falls under the home directory, it is effectively using the network-attached disk.
 
